@@ -48,9 +48,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 ```
-## Screenshots
 
- ![custom_switch](https://user-images.githubusercontent.com/35039342/60429173-1cedb780-9c18-11e9-8fcf-c0c7a52b0e2d.gif) 
+
+
 
 
 ## 👨 Developed By
