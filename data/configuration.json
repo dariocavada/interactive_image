@@ -1,0 +1,30 @@
+{
+    "id": "1",
+    "name": "Name of the map",
+    "floors": [
+        {
+            "id": "T",
+            "title": "Name of the floor",
+            "subtitle": "Name of the floor",
+            "description": "",
+            "imageurl": "<url of the image map>",
+            "items": [
+                {
+                    "id": "itemid",
+                    "number":"1",
+                    "title": "Name of the item ex. beacon 01",
+                    "subtitle": "",
+                    "description": "",
+                    "type": "circle, icon",
+                    "xPosition": 0.0,
+                    "yPosition": 0.0,
+                    "width": 30,
+                    "height": 30,
+                    "fillcolor": "#ffffff",
+                    "bordercolor": "#ffffff",
+                    "iconName" :"see flutter icon names"
+                }
+            ]
+        }
+    ]
+}
