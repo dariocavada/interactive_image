@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
         ),
         body: InteractiveImage(
           url:
-              'https://s3-eu-west-1.amazonaws.com/mkspresprod.suggesto.eu/mdgcaritro/mappe/demo/configuration.json',
+              'https://raw.githubusercontent.com/dariocavada/interactive_image/master/data/configuration.json',
         ),
       ),
     );
