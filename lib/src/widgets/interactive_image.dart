@@ -4,11 +4,21 @@ import 'package:interactive_image/src/models/iconfig.dart';
 import 'package:interactive_image/src/shared/icache_manager.dart';
 import 'package:interactive_image/src/shared/icached_image.dart';
 import 'movable_stack_item.dart';
-import 'dart:convert';
+import '../controllers/interactive_image_controller.dart';
+
+typedef StringCallback(String value);
 
 class InteractiveImage extends StatefulWidget {
-  InteractiveImage({Key? key, required this.url}) : super(key: key);
+  InteractiveImage({
+    Key? key,
+    required this.url,
+    this.interactive = false,
+    this.onGenerateConfig,
+  }) : super(key: key);
+
   final String url;
+  final bool interactive;
+  final StringCallback? onGenerateConfig;
 
   @override
   _InteractiveImageState createState() => _InteractiveImageState();
@@ -17,8 +27,10 @@ class InteractiveImage extends StatefulWidget {
 class _InteractiveImageState extends State<InteractiveImage> {
   List<Widget> stackItems = [];
   List<FloatingActionButton> floatinActionButtons = [];
-  String _selImage = 'T';
+  String _selFloor = '1';
   IConfig? iConfig;
+  final TransformationController _transformationController =
+      TransformationController();
 
   @override
   void initState() {
@@ -36,8 +48,17 @@ class _InteractiveImageState extends State<InteractiveImage> {
     });
   }
 
+  int _getFloorIndexFromId(String id) {
+    final index = iConfig!.floors.indexWhere((element) => element.id == id);
+    if (index < 0) {
+      return 0;
+    } else {
+      return index;
+    }
+  }
+
   void _asyncInitializer() async {
-    // TODO MANAGE NETWORK ERROR
+    // TODO MANAGE NETWORK ERRORS
     await CustomCacheManager.instance.emptyCache();
     FileInfo? fi2 =
         await CustomCacheManager.instance.getFileFromCache(widget.url);
@@ -45,58 +66,124 @@ class _InteractiveImageState extends State<InteractiveImage> {
       await CustomCacheManager.instance.downloadFile(widget.url);
     }
     var file = await CustomCacheManager.instance.getSingleFile(widget.url);
-
     iConfig = iConfigFromJson(file.readAsStringSync());
     setState(() {
-      var a = iConfig!.floors[0];
-      stackItems.add(
-        IcachedImage(
-          key: Key('imagemap'),
-          imageurl: a.imageurl,
-        ),
-      );
-
-      iConfig!.floors.forEach((floor) {
-        floatinActionButtons.add(
-          FloatingActionButton(
-            backgroundColor:
-                (_selImage == floor.id) ? Colors.orange : Colors.blue,
-            child: Text(floor.id),
-            onPressed: () {
-              _changeImage(floor.imageurl, floor.id);
-            },
-          ),
-        );
-      });
+      _addFloorButtons();
+      _addFloorElements();
     });
   }
 
-  void _incrementCounter() {
+  void _addFloorElements() {
+    stackItems.clear();
+    print("_addFloorElements ${stackItems.length}");
     setState(() {
-      stackItems.add(MoveableStackItem());
+      _addImageItem();
+      _addMovableStackItems();
     });
   }
 
-  void _changeImage(String imgUrl, String id) {
-    int itemToDel = -1;
+  void _addImageItem() {
+    var a = iConfig!.floors[_getFloorIndexFromId(_selFloor)];
+    stackItems.add(
+      IcachedImage(
+        key: Key('imagemap'),
+        imageurl: a.imageurl,
+      ),
+    );
+  }
 
-    for (int i = 0; i < stackItems.length; i++) {
-      if (stackItems[i].key == Key('imagemap')) {
-        itemToDel = i;
-      }
-    }
+  void _addMovableStackItems() {
+    iConfig!.floors[_getFloorIndexFromId(_selFloor)].items.forEach((msitem) {
+      stackItems.add(MoveableStackItem(
+        msitem: msitem,
+        interactive: true,
+      ));
+    });
+  }
 
-    if (itemToDel >= 0) {
-      stackItems.removeAt(itemToDel);
-    }
-    setState(() {
-      _selImage = id;
-      stackItems.add(
-        IcachedImage(
-          key: Key('imagemap'),
-          imageurl: imgUrl,
+  void _addFloorButtons() {
+    floatinActionButtons.clear();
+    iConfig!.floors.forEach((floor) {
+      floatinActionButtons.add(
+        FloatingActionButton(
+          backgroundColor:
+              (_selFloor == floor.id) ? Colors.orange : Colors.blue,
+          child: Text(floor.id),
+          onPressed: () {
+            _changeFloor(floor.id);
+          },
         ),
       );
+    });
+
+    if (widget.interactive) {
+      // Add a + for adding points
+      floatinActionButtons.add(
+        FloatingActionButton(
+          backgroundColor: Colors.red,
+          child: Icon(Icons.plus_one),
+          onPressed: () {
+            _addNewMSItem();
+          },
+        ),
+      );
+
+      // Add a export for generating JSON
+      floatinActionButtons.add(
+        FloatingActionButton(
+          backgroundColor: Colors.red,
+          child: Icon(Icons.download),
+          onPressed: () {
+            _generateJSonConfig();
+          },
+        ),
+      );
+    }
+  }
+
+  void _addNewMSItem() {
+    setState(() {
+      MSItem msitem = MSItem(
+          id: '999',
+          number: 'number',
+          title: 'title',
+          subtitle: 'subtitle',
+          description: 'description',
+          type: 'type',
+          xPosition: 0.0,
+          yPosition: 0.0,
+          width: 10,
+          height: 10,
+          fillcolor: 'fillcolor',
+          bordercolor: 'bordercolor',
+          iconName: 'iconName');
+
+      iConfig?.floors[_getFloorIndexFromId(_selFloor)].items.add(msitem);
+
+      _addFloorElements();
+    });
+  }
+
+  void _generateJSonConfig() {
+    stackItems.forEach((element) {
+      print(element.runtimeType);
+    });
+
+    if (widget.onGenerateConfig != null) {
+      widget.onGenerateConfig!(iConfigToJson(iConfig!));
+    } else {
+      print("Config");
+      print(iConfigToJson(iConfig!));
+      print("...");
+    }
+  }
+
+  void _changeFloor(String id) {
+    setState(() {
+      print('$_changeFloor $id');
+      _selFloor = id;
+      _addFloorElements();
+      _addFloorButtons();
     });
   }
 
@@ -110,10 +197,23 @@ class _InteractiveImageState extends State<InteractiveImage> {
           InteractiveViewer(
             //alignPanAxis: true,
             //boundaryMargin: EdgeInsets.all(double.infinity),
-            // transformationController:
+            transformationController: _transformationController,
             minScale: 0.1,
             maxScale: 3.0,
             constrained: true,
+            onInteractionStart: (_) {
+              print('Interaction Start');
+              print('on interaction start ${_transformationController.value}');
+            },
+            onInteractionEnd: (details) {
+              print('on interaction end');
+              setState(() {
+                //_transformationController.value = Matrix4.identity();
+                //_transformationController.toScene(Offset.zero);
+                print('${_transformationController.value}');
+              });
+            },
+            //onInteractionUpdate: (_) => print('Interaction Updated'),
             child: Stack(
               fit: StackFit.expand,
               children: stackItems,

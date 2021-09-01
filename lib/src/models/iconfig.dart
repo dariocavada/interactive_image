@@ -47,7 +47,7 @@ class Floor {
   final String subtitle;
   final String description;
   final String imageurl;
-  final List<Item> items;
+  final List<MSItem> items;
 
   factory Floor.fromJson(Map<String, dynamic> json) => Floor(
         id: json["id"] ?? '',
@@ -55,7 +55,7 @@ class Floor {
         subtitle: json["subtitle"] ?? '',
         description: json["description"] ?? '',
         imageurl: json["imageurl"] ?? '',
-        items: List<Item>.from(json["items"].map((x) => Item.fromJson(x))),
+        items: List<MSItem>.from(json["items"].map((x) => MSItem.fromJson(x))),
       );
 
   Map<String, dynamic> toJson() => {
@@ -68,8 +68,8 @@ class Floor {
       };
 }
 
-class Item {
-  Item({
+class MSItem {
+  MSItem({
     required this.id,
     required this.number,
     required this.title,
@@ -91,23 +91,23 @@ class Item {
   final String subtitle;
   final String description;
   final String type;
-  final int xPosition;
-  final int yPosition;
-  final int width;
-  final int height;
-  final String fillcolor;
-  final String bordercolor;
-  final String iconName;
+  double xPosition;
+  double yPosition;
+  int width;
+  int height;
+  String fillcolor;
+  String bordercolor;
+  String iconName;
 
-  factory Item.fromJson(Map<String, dynamic> json) => Item(
+  factory MSItem.fromJson(Map<String, dynamic> json) => MSItem(
         id: json["id"] ?? '',
         number: json["number"] ?? '',
         title: json["title"] ?? '',
         subtitle: json["subtitle"] ?? '',
         description: json["description"] ?? '',
         type: json["type"] ?? '',
-        xPosition: json["xPosition"] ?? 0,
-        yPosition: json["yPosition"] ?? 0,
+        xPosition: json["xPosition"] ?? 0.0,
+        yPosition: json["yPosition"] ?? 0.0,
         width: json["width"] ?? 10,
         height: json["height"] ?? 10,
         fillcolor: json["fillcolor"] ?? '',
