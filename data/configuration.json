@@ -17,7 +17,7 @@
             "title": "Floor 2",
             "subtitle": "Subtitle",
             "description": "Description",
-            "imageurl": "https://raw.githubusercontent.com/dariocavada/interactive_image/master/data/floor_1.png",
+            "imageurl": "https://raw.githubusercontent.com/dariocavada/interactive_image/master/data/floor_2.png",
             "items": [
                 
             ]
@@ -27,7 +27,7 @@
             "title": "Floor 3",
             "subtitle": "Subtitle",
             "description": "Description",
-            "imageurl": "https://raw.githubusercontent.com/dariocavada/interactive_image/master/data/floor_1.png",
+            "imageurl": "https://raw.githubusercontent.com/dariocavada/interactive_image/master/data/floor_3.png",
             "items": [
                 
             ]
