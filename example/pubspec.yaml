@@ -26,8 +26,7 @@ dependencies:
 
   cupertino_icons: ^1.0.2
   share_plus: ^2.1.4
-  path_provider: ^2.0.2
-
+  
   interactive_image:
     path: ../
     
