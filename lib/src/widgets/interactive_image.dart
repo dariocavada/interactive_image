@@ -43,6 +43,10 @@ class _InteractiveImageState extends State<InteractiveImage> {
   String _itemTitle = '';
   String _locationId = '';
   IConfig? iConfig;
+
+  double parentHeight = 100;
+  double parentWidth = 100;
+
   final TransformationController _transformationController =
       TransformationController();
 
@@ -158,6 +162,8 @@ class _InteractiveImageState extends State<InteractiveImage> {
       if (widget.interactive == true) {
         stackItems.add(MoveableStackItem(
           msitem: msitem,
+          parentHeight: parentHeight,
+          parentWidth: parentWidth,
           interactive: true,
           onItemSelect: (String id) {
             setState(() {
@@ -175,6 +181,9 @@ class _InteractiveImageState extends State<InteractiveImage> {
       if (widget.interactive == false && msitem.id == widget.itemid) {
         stackItems.add(MoveableStackItem(
           msitem: msitem,
+          parentHeight: parentHeight,
+          parentWidth: parentWidth,
+
           interactive: false,
           iconname: 'circle', // Override the icon name
           iconcolor: '#FF0000',
@@ -189,6 +198,9 @@ class _InteractiveImageState extends State<InteractiveImage> {
       if (widget.interactive == false && msitem.id == _locationId) {
         stackItems.add(MoveableStackItem(
           msitem: msitem,
+          parentHeight: parentHeight,
+          parentWidth: parentWidth,
+
           interactive: false,
           pulse: true,
           iconname: 'my_location', // Override the icon name
@@ -344,32 +356,37 @@ class _InteractiveImageState extends State<InteractiveImage> {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                InteractiveViewer(
-                  //alignPanAxis: true,
-                  //boundaryMargin: EdgeInsets.all(double.infinity),
-                  transformationController: _transformationController,
-                  minScale: 0.1,
-                  maxScale: 3.0,
-                  constrained: true,
-                  onInteractionStart: (_) {
-                    print('Interaction Start');
-                    print(
-                        'on interaction start ${_transformationController.value}');
-                  },
-                  onInteractionEnd: (details) {
-                    print('on interaction end');
-                    setState(() {
-                      //_transformationController.value = Matrix4.identity();
-                      //_transformationController.toScene(Offset.zero);
-                      print('${_transformationController.value}');
-                    });
-                  },
-                  //onInteractionUpdate: (_) => print('Interaction Updated'),
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: stackItems,
-                  ),
-                ),
+                LayoutBuilder(builder: (context, snapshot) {
+                  parentHeight = snapshot.maxHeight;
+                  parentWidth = snapshot.maxWidth;
+                  print('Max height:  $parentHeight Max width: $parentWidth');
+                  return InteractiveViewer(
+                    //alignPanAxis: true,
+                    //boundaryMargin: EdgeInsets.all(double.infinity),
+                    transformationController: _transformationController,
+                    minScale: 0.1,
+                    maxScale: 3.0,
+                    constrained: true,
+                    onInteractionStart: (_) {
+                      print('Interaction Start');
+                      print(
+                          'on interaction start ${_transformationController.value}');
+                    },
+                    onInteractionEnd: (details) {
+                      print('on interaction end');
+                      setState(() {
+                        //_transformationController.value = Matrix4.identity();
+                        //_transformationController.toScene(Offset.zero);
+                        print('${_transformationController.value}');
+                      });
+                    },
+                    //onInteractionUpdate: (_) => print('Interaction Updated'),
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: stackItems,
+                    ),
+                  );
+                }),
                 Positioned(
                   right: 10,
                   top: 10,

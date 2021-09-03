@@ -8,6 +8,7 @@ class IcachedImage extends StatelessWidget {
   const IcachedImage({
     Key? key,
     required this.imageurl,
+    //this.fit = BoxFit.none,
     this.fit = BoxFit.contain,
   }) : super(key: key);
 

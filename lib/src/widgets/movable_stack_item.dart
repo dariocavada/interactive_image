@@ -31,6 +31,8 @@ class MoveableStackItem extends StatefulWidget {
   MoveableStackItem({
     Key? key,
     required this.msitem,
+    required this.parentHeight,
+    required this.parentWidth,
     this.interactive = false,
     this.pulse = false,
     this.iconname = '',
@@ -43,6 +45,8 @@ class MoveableStackItem extends StatefulWidget {
   final bool pulse;
   final String iconname;
   final String iconcolor;
+  final double parentHeight;
+  final double parentWidth;
   final StringCallback? onItemSelect;
 
   @override
@@ -91,8 +95,8 @@ class _MoveableStackItemState extends State<MoveableStackItem> {
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      top: widget.msitem.yPosition,
-      left: widget.msitem.xPosition,
+      top: widget.msitem.yPosition * widget.parentHeight,
+      left: widget.msitem.xPosition * widget.parentWidth,
       child: GestureDetector(
         onTap: () {
           if (widget.onItemSelect != null) {
@@ -103,22 +107,22 @@ class _MoveableStackItemState extends State<MoveableStackItem> {
         },
         onPanUpdate: (tapInfo) {
           setState(() {
-            widget.msitem.xPosition += tapInfo.delta.dx;
-            widget.msitem.yPosition += tapInfo.delta.dy;
+            widget.msitem.xPosition += (tapInfo.delta.dx / widget.parentWidth);
+            widget.msitem.yPosition += (tapInfo.delta.dy / widget.parentHeight);
           });
         },
         /*child: PulsingWidget(
-          child: Icon(
-            iconMapping[widget.msitem.iconName],
-            color: color,
-          ),
-        ),*/
+              child: Icon(
+                iconMapping[widget.msitem.iconName],
+                color: color,
+              ),
+            ),*/
         child: _getCalcIcon(),
         /*Container(
-          width: 30,
-          height: 30,
-          color: color,
-        ),*/
+              width: 30,
+              height: 30,
+              color: color,
+            ),*/
       ),
     );
   }

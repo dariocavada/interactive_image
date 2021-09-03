@@ -67,8 +67,12 @@ class _HomeScreenState extends State<HomeScreen> {
           itemtitle: 'Name of the poi',
           // Shown only if the controller is attached and the positionid is set
           mypositionlabel: 'La tua posizione',
+          /* url:
+              'https://raw.githubusercontent.com/dariocavada/interactive_image/master/data/configuration.json',*/
+          /*url:
+              'https://s3-eu-west-1.amazonaws.com/mkspresprod.suggesto.eu/mdgcaritro/mappe/demo/configuration.json',*/
           url:
-              'https://raw.githubusercontent.com/dariocavada/interactive_image/master/data/configuration.json',
+              'https://s3-eu-west-1.amazonaws.com/mkspresprod.suggesto.eu/mdgcaritro/mappe/mcf/configuration.json',
           onGenerateConfig: (value) async {
             Share.share(value, subject: 'Interactive Image Configuration');
             /*Share.shareFiles([file.path],
@@ -136,7 +140,7 @@ class _TestScreenState extends State<TestScreen> {
         /* url:
               'https://raw.githubusercontent.com/dariocavada/interactive_image/master/data/configuration.json',*/
         url:
-            'https://s3-eu-west-1.amazonaws.com/mkspresprod.suggesto.eu/mdgcaritro/mappe/demo/configuration.json',
+            'https://s3-eu-west-1.amazonaws.com/mkspresprod.suggesto.eu/mdgcaritro/mappe/mcf/configuration.json',
       ),
     );
   }
