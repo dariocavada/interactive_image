@@ -9,7 +9,8 @@ class IcachedImage extends StatelessWidget {
     Key? key,
     required this.imageurl,
     //this.fit = BoxFit.none,
-    this.fit = BoxFit.contain,
+    //this.fit = BoxFit.contain, // TODO - contain with image width and eight or external box...
+    this.fit = BoxFit.fill,
   }) : super(key: key);
 
   final String imageurl;

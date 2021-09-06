@@ -2,7 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:interactive_image/interactive_image.dart';
 
+import 'package:flutter/rendering.dart';
+
+import 'animated_map.dart';
+import 'image_map.dart';
+
 void main() {
+  /*debugPaintSizeEnabled = true;
+  debugPaintBaselinesEnabled = false;
+  debugPaintLayerBordersEnabled = false;
+  debugPaintPointersEnabled = true;
+  debugRepaintRainbowEnabled = false;
+  debugRepaintTextRainbowEnabled = false;
+  debugCheckElevationsEnabled = false;
+  debugDisableClipLayers = false;
+  debugDisablePhysicalShapeLayers = true;
+  debugDisableOpacityLayers = true;*/
   runApp(MyApp());
 }
 
@@ -21,6 +36,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: HomeScreen(),
+      //home: AnimatedMapControllerPage(),
     );
   }
 }
@@ -37,6 +53,18 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      /*bottomSheet: Container(
+        color: Colors.yellow,
+        alignment: Alignment.center,
+        height: 100,
+        width: double.infinity,
+        padding: const EdgeInsets.all(20.0),
+        child: Text(
+          'USe Image size for markers ! https://stackoverflow.com/questions/49307677/how-to-get-height-of-a-widget',
+          maxLines: 10,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),*/
       appBar: AppBar(
         title: Text('Interactive Image: Edit mode'),
         actions: <Widget>[
@@ -48,7 +76,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 context,
                 MaterialPageRoute(builder: (context) {
                   return TestScreen(
-                    itemid: _itemid,
+                    itemid: '101',
                   );
                 }),
               );
@@ -57,7 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
           //IconButton
         ],
       ),
-      body: InteractiveImage(
+      body: InteractiveImageMap(
           clearcache: false,
           interactive: true,
           iicontroller: interactiveImageController,
@@ -131,7 +159,7 @@ class _TestScreenState extends State<TestScreen> {
           ),
         ],
       ),
-      body: InteractiveImage(
+      body: InteractiveImageMap(
         clearcache: false,
         interactive: false,
         iicontroller: interactiveImageController,

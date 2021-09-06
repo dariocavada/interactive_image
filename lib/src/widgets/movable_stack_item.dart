@@ -31,8 +31,10 @@ class MoveableStackItem extends StatefulWidget {
   MoveableStackItem({
     Key? key,
     required this.msitem,
-    required this.parentHeight,
-    required this.parentWidth,
+    required this.sy,
+    required this.sx,
+    required this.dx,
+    required this.dy,
     this.interactive = false,
     this.pulse = false,
     this.iconname = '',
@@ -45,8 +47,10 @@ class MoveableStackItem extends StatefulWidget {
   final bool pulse;
   final String iconname;
   final String iconcolor;
-  final double parentHeight;
-  final double parentWidth;
+  final double sy;
+  final double sx;
+  final double dy;
+  final double dx;
   final StringCallback? onItemSelect;
 
   @override
@@ -95,8 +99,8 @@ class _MoveableStackItemState extends State<MoveableStackItem> {
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      top: widget.msitem.yPosition * widget.parentHeight,
-      left: widget.msitem.xPosition * widget.parentWidth,
+      top: widget.msitem.latLng[0] * widget.sy + widget.dy,
+      left: widget.msitem.latLng[1] * widget.sx + widget.dx,
       child: GestureDetector(
         onTap: () {
           if (widget.onItemSelect != null) {
@@ -107,8 +111,8 @@ class _MoveableStackItemState extends State<MoveableStackItem> {
         },
         onPanUpdate: (tapInfo) {
           setState(() {
-            widget.msitem.xPosition += (tapInfo.delta.dx / widget.parentWidth);
-            widget.msitem.yPosition += (tapInfo.delta.dy / widget.parentHeight);
+            widget.msitem.latLng[0] += (tapInfo.delta.dx / widget.sx);
+            widget.msitem.latLng[1] += (tapInfo.delta.dy / widget.sy);
           });
         },
         /*child: PulsingWidget(

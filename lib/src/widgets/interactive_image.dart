@@ -5,6 +5,7 @@ import 'package:interactive_image/src/shared/icache_manager.dart';
 import 'package:interactive_image/src/shared/icached_image.dart';
 import 'movable_stack_item.dart';
 import '../controllers/interactive_image_controller.dart';
+import 'measured_size.dart';
 
 typedef StringCallback(String value);
 
@@ -37,6 +38,7 @@ class InteractiveImage extends StatefulWidget {
 }
 
 class _InteractiveImageState extends State<InteractiveImage> {
+  GlobalKey imageLayerKey = GlobalKey();
   List<Widget> stackItems = [];
   List<Widget> floatinActionButtons = [];
   String _selFloor = '1';
@@ -44,8 +46,13 @@ class _InteractiveImageState extends State<InteractiveImage> {
   String _locationId = '';
   IConfig? iConfig;
 
-  double parentHeight = 100;
-  double parentWidth = 100;
+  double parentHeight = 800;
+  double parentWidth = 600;
+
+  double sx = 100;
+  double sy = 100;
+  double dx = 0;
+  double dy = 0;
 
   final TransformationController _transformationController =
       TransformationController();
@@ -95,7 +102,7 @@ class _InteractiveImageState extends State<InteractiveImage> {
         _addItemIds();
         setState(() {
           _addFloorButtons();
-          _addFloorElements();
+          //_addFloorElements(); **M
         });
       } catch (e) {
         _addErrorElement('No internet connection');
@@ -133,22 +140,50 @@ class _InteractiveImageState extends State<InteractiveImage> {
     //widget.iicontroller.loctionList
   }
 
-  void _addFloorElements() {
+  _getStackItems() {
+    //var a = iConfig!.floors[_getFloorIndexFromId(_selFloor)];
     stackItems.clear();
+    _calculateSizeAndPosition();
+    print('*********** !!!!!!!! Get Stack Items');
+    _addImageItem();
+    _addMovableStackItems();
+    return stackItems;
+  }
+
+  void _addFloorElements() {
+    /* stackItems.clear();
     print("_addFloorElements ${stackItems.length}");
     setState(() {
       _addImageItem();
       _addMovableStackItems();
-    });
+    });*/
   }
 
   void _addImageItem() {
-    var a = iConfig!.floors[_getFloorIndexFromId(_selFloor)];
-    stackItems.add(
-      IcachedImage(
-        imageurl: a.imageurl,
+    if (iConfig != null) {
+      var a = iConfig!.floors[_getFloorIndexFromId(_selFloor)];
+      print('****** _addImageItem');
+      stackItems.add(FittedBox(
+        child: MeasuredSize(
+          onChange: (size) {
+            print('MeasuredSize size ${size.width}');
+          },
+          child: IcachedImage(
+            key: imageLayerKey,
+            imageurl: a.imageurl,
+          ),
+        ),
+      ));
+    }
+    /*stackItems.add(Positioned(
+      width: 200,
+      height: 300,
+      top: 10,
+      left: 10,
+      child: Container(
+        color: Colors.black45,
       ),
-    );
+    ));*/
   }
 
   void _addMovableStackItems() {
@@ -162,8 +197,10 @@ class _InteractiveImageState extends State<InteractiveImage> {
       if (widget.interactive == true) {
         stackItems.add(MoveableStackItem(
           msitem: msitem,
-          parentHeight: parentHeight,
-          parentWidth: parentWidth,
+          sy: sy,
+          sx: sx,
+          dy: dy,
+          dx: dx,
           interactive: true,
           onItemSelect: (String id) {
             setState(() {
@@ -181,9 +218,10 @@ class _InteractiveImageState extends State<InteractiveImage> {
       if (widget.interactive == false && msitem.id == widget.itemid) {
         stackItems.add(MoveableStackItem(
           msitem: msitem,
-          parentHeight: parentHeight,
-          parentWidth: parentWidth,
-
+          sx: sx,
+          sy: sy,
+          dx: dx,
+          dy: dy,
           interactive: false,
           iconname: 'circle', // Override the icon name
           iconcolor: '#FF0000',
@@ -198,8 +236,10 @@ class _InteractiveImageState extends State<InteractiveImage> {
       if (widget.interactive == false && msitem.id == _locationId) {
         stackItems.add(MoveableStackItem(
           msitem: msitem,
-          parentHeight: parentHeight,
-          parentWidth: parentWidth,
+          sx: sx,
+          sy: sy,
+          dx: dx,
+          dy: dy,
 
           interactive: false,
           pulse: true,
@@ -276,8 +316,7 @@ class _InteractiveImageState extends State<InteractiveImage> {
           subtitle: 'subtitle',
           description: 'description',
           type: 'type',
-          xPosition: 0.0,
-          yPosition: 0.0,
+          latLng: [0.0, 0.0],
           width: 10,
           height: 10,
           fillcolor: 'fillcolor',
@@ -308,9 +347,46 @@ class _InteractiveImageState extends State<InteractiveImage> {
     setState(() {
       print('$_changeFloor $id');
       _selFloor = id;
-      _addFloorElements();
+
+      //_addFloorElements();
       _addFloorButtons();
     });
+  }
+
+  void _calculateSizeAndPosition() {
+    //final Size? box = imageLayerKey.currentContext?.size;
+
+    final Size box = Size(1984, 1160);
+
+    if (box != null) {
+      print("$parentWidth-$parentHeight ${box.width}-${box.height}; ");
+
+      var arx = box.width;
+      var ary = box.height;
+
+      var acx = parentWidth;
+      var acy = parentHeight;
+
+      dx = 0.0;
+      dy = 0.0;
+
+      sy = 0.0;
+      sx = 0.0;
+
+      if ((arx / ary) < (acx / acy)) {
+        dy = 0.0;
+        sy = acy;
+        sx = arx / ary * acy;
+        dx = (acx - sx).abs() / 2;
+      } else {
+        dx = 0.0;
+        sx = acx;
+        sy = ary / arx * acx;
+        dy = (acy - sy).abs() / 2;
+      }
+
+      print('sx: $sx, sy: $sy, dx: $dx, dy: $dy');
+    }
   }
 
   @override
@@ -352,41 +428,46 @@ class _InteractiveImageState extends State<InteractiveImage> {
           ),
         Expanded(
           child: Container(
-            color: Colors.white,
+            color: Colors.red,
             child: Stack(
               fit: StackFit.expand,
               children: [
-                LayoutBuilder(builder: (context, snapshot) {
-                  parentHeight = snapshot.maxHeight;
-                  parentWidth = snapshot.maxWidth;
-                  print('Max height:  $parentHeight Max width: $parentWidth');
-                  return InteractiveViewer(
-                    //alignPanAxis: true,
-                    //boundaryMargin: EdgeInsets.all(double.infinity),
-                    transformationController: _transformationController,
-                    minScale: 0.1,
-                    maxScale: 3.0,
-                    constrained: true,
-                    onInteractionStart: (_) {
-                      print('Interaction Start');
-                      print(
-                          'on interaction start ${_transformationController.value}');
-                    },
-                    onInteractionEnd: (details) {
-                      print('on interaction end');
-                      setState(() {
-                        //_transformationController.value = Matrix4.identity();
-                        //_transformationController.toScene(Offset.zero);
-                        print('${_transformationController.value}');
-                      });
-                    },
-                    //onInteractionUpdate: (_) => print('Interaction Updated'),
-                    child: Stack(
+                InteractiveViewer(
+                  //alignPanAxis: true,
+                  //boundaryMargin: EdgeInsets.all(double.infinity),
+                  transformationController: _transformationController,
+                  minScale: 0.1,
+                  maxScale: 3.0,
+                  constrained: true,
+                  onInteractionStart: (_) {
+                    print('Interaction Start');
+                    print(
+                        'on interaction start ${_transformationController.value}');
+                  },
+                  onInteractionEnd: (details) {
+                    print('on interaction end');
+                    setState(() {
+                      //_transformationController.value = Matrix4.identity();
+                      //_transformationController.toScene(Offset.zero);
+                      print('${_transformationController.value}');
+                    });
+                  },
+                  //onInteractionUpdate: (_) => print('Interaction Updated'),
+                  child: LayoutBuilder(builder: (ctx, constraints) {
+                    if (parentHeight != constraints.maxHeight) {
+                      parentHeight = constraints.maxHeight;
+                      parentWidth = constraints.maxWidth;
+                      _calculateSizeAndPosition();
+                    }
+
+                    print('Max height:  $parentHeight Max width: $parentWidth');
+                    return Stack(
                       fit: StackFit.expand,
-                      children: stackItems,
-                    ),
-                  );
-                }),
+                      //children: stackItems,
+                      children: _getStackItems(),
+                    );
+                  }),
+                ),
                 Positioned(
                   right: 10,
                   top: 10,

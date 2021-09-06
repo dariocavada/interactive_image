@@ -38,6 +38,7 @@ class Floor {
     required this.title,
     required this.subtitle,
     required this.description,
+    required this.latLngBounds,
     required this.imageurl,
     required this.items,
   });
@@ -46,6 +47,7 @@ class Floor {
   final String title;
   final String subtitle;
   final String description;
+  final List<List<double>> latLngBounds;
   final String imageurl;
   final List<MSItem> items;
 
@@ -54,6 +56,8 @@ class Floor {
         title: json["title"] ?? '',
         subtitle: json["subtitle"] ?? '',
         description: json["description"] ?? '',
+        latLngBounds: List<List<double>>.from(json["latLngBounds"]
+            .map((x) => List<double>.from(x.map((x) => x.toDouble())))),
         imageurl: json["imageurl"] ?? '',
         items: List<MSItem>.from(json["items"].map((x) => MSItem.fromJson(x))),
       );
@@ -63,6 +67,8 @@ class Floor {
         "title": title,
         "subtitle": subtitle,
         "description": description,
+        "latLngBounds": List<dynamic>.from(
+            latLngBounds.map((x) => List<dynamic>.from(x.map((x) => x)))),
         "imageurl": imageurl,
         "items": List<dynamic>.from(items.map((x) => x.toJson())),
       };
@@ -76,8 +82,7 @@ class MSItem {
     required this.subtitle,
     required this.description,
     required this.type,
-    required this.xPosition,
-    required this.yPosition,
+    required this.latLng,
     required this.width,
     required this.height,
     required this.fillcolor,
@@ -91,8 +96,7 @@ class MSItem {
   final String subtitle;
   final String description;
   final String type;
-  double xPosition;
-  double yPosition;
+  final List<double> latLng;
   int width;
   int height;
   String fillcolor;
@@ -106,8 +110,7 @@ class MSItem {
         subtitle: json["subtitle"] ?? '',
         description: json["description"] ?? '',
         type: json["type"] ?? '',
-        xPosition: json["xPosition"] ?? 0.0,
-        yPosition: json["yPosition"] ?? 0.0,
+        latLng: List<double>.from(json["latLng"].map((x) => x.toDouble())),
         width: json["width"] ?? 10,
         height: json["height"] ?? 10,
         fillcolor: json["fillcolor"] ?? '',
@@ -122,8 +125,7 @@ class MSItem {
         "subtitle": subtitle,
         "description": description,
         "type": type,
-        "xPosition": xPosition,
-        "yPosition": yPosition,
+        "latLng": List<dynamic>.from(latLng.map((x) => x)),
         "width": width,
         "height": height,
         "fillcolor": fillcolor,

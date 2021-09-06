@@ -26,6 +26,9 @@ dependencies:
 
   cupertino_icons: ^1.0.2
   share_plus: ^2.1.4
+
+  flutter_map: ^0.13.1
+  
   
   interactive_image:
     path: ../
