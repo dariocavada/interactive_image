@@ -10,6 +10,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
 typedef IIMStringCallback(String value);
+typedef IIMSItemCallback(MSItem value);
 
 class InteractiveImageMap extends StatefulWidget {
   InteractiveImageMap({
@@ -22,6 +23,7 @@ class InteractiveImageMap extends StatefulWidget {
     this.itemtitle = '',
     this.mypositionlabel = '',
     this.onGenerateConfig,
+    this.onAddNewItem,
     this.onItemClick,
   }) : super(key: key);
 
@@ -33,7 +35,8 @@ class InteractiveImageMap extends StatefulWidget {
   final bool interactive;
   final bool clearcache;
   final IIMStringCallback? onGenerateConfig;
-  final IIMStringCallback? onItemClick;
+  final IIMStringCallback? onAddNewItem;
+  final IIMSItemCallback? onItemClick;
 
   @override
   _InteractiveImageMapState createState() => _InteractiveImageMapState();
@@ -53,6 +56,7 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
   String _selFloor = '0';
   String _itemTitle = '';
   String _locationId = '';
+  String _locationDescription = '';
   IConfig? iConfig;
 
   @override
@@ -61,19 +65,70 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
 
     mapController = MapController();
 
-    widget.iicontroller.addListener(() {
-      if (widget.iicontroller.locationId != '') {
-        setState(() {
-          print('new locationid: ${widget.iicontroller.locationId}');
-          _locationId = widget.iicontroller.locationId;
-        });
-      }
-    });
+    widget.iicontroller.addListener(_iicListener);
 
     _itemTitle = widget.itemtitle;
     WidgetsBinding.instance?.addPostFrameCallback((_) {
       _asyncInitializer();
     });
+  }
+
+  void _iicListener() {
+    print(
+        'InteractiveImageMap receive notification ${widget.iicontroller.locationId}');
+
+    if (widget.interactive == true) {
+      if (iConfig != null) {
+        iConfig!.floors.forEach((floor) {
+          floor.items.forEach((msitem) {
+            // Your Location
+
+            if (msitem.id == widget.iicontroller.msitem.id) {
+              print(
+                  'InteractiveImageMap modify with ${widget.iicontroller.msitem.title}');
+              setState(() {
+                msitem.id = widget.iicontroller.msitem.id;
+                msitem.number = widget.iicontroller.msitem.number;
+                msitem.title = widget.iicontroller.msitem.title;
+                msitem.subtitle = widget.iicontroller.msitem.subtitle;
+                msitem.description = widget.iicontroller.msitem.description;
+              });
+              // change content of msitem
+            }
+          });
+        });
+      }
+    }
+
+    if (widget.iicontroller.locationId != '') {
+      setState(() {
+        print(
+            'InteractiveImageMap new locationid: ${widget.iicontroller.locationId}');
+        _locationId = widget.iicontroller.locationId;
+        //_locationDescription = _locationId + 'inserirlo qui ?';
+
+        if (iConfig != null) {
+          iConfig!.floors.forEach((floor) {
+            floor.items.forEach((msitem) {
+              // Your Location
+              if (widget.interactive == false &&
+                  msitem.number == widget.iicontroller.locationId) {
+                _locationDescription =
+                    '${msitem.title}) ${msitem.subtitle} [${floor.id}]';
+              }
+            });
+          });
+        }
+
+        //_getPosAndDestinationMarkers();
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.iicontroller.removeListener(_iicListener);
+    super.dispose();
   }
 
   int _getFloorIndexFromId(String id) {
@@ -98,8 +153,9 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
         await CustomCacheManager.instance.downloadFile(widget.url);
         var file = await CustomCacheManager.instance.getSingleFile(widget.url);
         iConfig = iConfigFromJson(file.readAsStringSync());
-        _addItemIds();
-        _changeFloor('0');
+        String itemFloor = _addItemIds(widget.itemid);
+
+        _changeFloor(itemFloor);
       } catch (e) {
         _addErrorElement('No internet connection ${e.toString()}');
       }
@@ -127,28 +183,42 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
     });*/
   }
 
-  void _addItemIds() {
+  String _addItemIds(String itemId) {
     widget.iicontroller.locationList.clear();
+    String itemFloor = '';
     iConfig!.floors.forEach((floor) {
       floor.items.forEach((msitem) {
         widget.iicontroller.locationList.add(msitem.id);
+        if (itemId == msitem.number) {
+          itemFloor = floor.id;
+          print('$itemId - ${msitem.number} - ${floor.id}');
+        }
       });
     });
+    return itemFloor;
     //widget.iicontroller.loctionList
   }
 
-  List<CircleMarker> _getMarkers() {
+  List<CircleMarker> _getCircles() {
     if (widget.interactive) {
-      return _getAllMarkers();
+      return [];
     } else {
-      return _getPosAndDestinationMarkers();
+      return _getPosAndDestinationCircles();
     }
   }
 
-  List<CircleMarker> _getAllMarkers() {
-    print('========>>>> _getPosAndDestinationMarkers');
+  List<Marker> _getMarkers() {
+    if (widget.interactive) {
+      return _getAllMarkers();
+    } else {
+      return [];
+    }
+  }
+
+  List<Marker> _getAllMarkers() {
+    print('========>>>> _getAllMarkers');
     int i = 0;
-    List<CircleMarker> cm = [];
+    List<Marker> cm = [];
     if (iConfig != null) {
       iConfig!.floors[_getFloorIndexFromId(_selFloor)].items.forEach((msitem) {
         // If not in edit mode add only the itemid passed as parameter
@@ -156,33 +226,49 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
         print("$i ${widget.interactive} ${msitem.id} ${widget.itemid}");
         print('========>>>> ${msitem.latLng[0]}, ${msitem.latLng[1]}');
         cm.add(
-          CircleMarker(
-              point: LatLng(msitem.latLng[0], msitem.latLng[1]),
-              color: Colors.amber.withOpacity(0.6),
-              borderColor: Colors.green,
-              borderStrokeWidth: 4,
-              useRadiusInMeter: true,
-              radius: .5 // 2000 meters | 2 km
-              ),
+          Marker(
+            width: 32.0,
+            height: 32.0,
+            point: LatLng(msitem.latLng[0], msitem.latLng[1]),
+            builder: (ctx) => Container(
+              child: GestureDetector(
+                  onTap: () {
+                    String msg =
+                        'Marker: ${msitem.id} - ${msitem.number} - ${msitem.title}: ${msitem.subtitle}';
+                    if (widget.onItemClick != null) {
+                      widget.onItemClick!(msitem);
+                      print(msitem.id);
+                      setState(() {
+                        _itemTitle = msg;
+                      });
+                    } else {
+                      ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(
+                        content: Text(msg),
+                      ));
+                    }
+                  },
+                  child: Icon(Icons.circle_rounded)),
+            ),
+          ),
         );
       });
     }
     return cm;
   }
 
-  List<CircleMarker> _getPosAndDestinationMarkers() {
-    print('========>>>> _getPosAndDestinationMarkers');
+  List<CircleMarker> _getPosAndDestinationCircles() {
+    print('========>>>> _getPosAndDestinationMarkers ${widget.itemid}');
     int i = 0;
     List<CircleMarker> cm = [];
     if (iConfig != null) {
       iConfig!.floors[_getFloorIndexFromId(_selFloor)].items.forEach((msitem) {
         // If not in edit mode add only the itemid passed as parameter
         i++;
-        // TODO: ADD also the myposition, if available...
 
-        if (widget.interactive == false && msitem.id == widget.itemid) {
+        // POI
+        if (widget.interactive == false && msitem.number == widget.itemid) {
           print("$i ${widget.interactive} ${msitem.id} ${widget.itemid}");
-          print('========>>>> ${msitem.latLng[0]}, ${msitem.latLng[1]}');
+          print('========>>>> POI ${msitem.latLng[0]}, ${msitem.latLng[1]}');
           cm.add(CircleMarker(
               point: LatLng(msitem.latLng[0], msitem.latLng[1]),
               color: Colors.amber.withOpacity(0.6),
@@ -193,9 +279,14 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
               ));
         }
 
-        if (widget.interactive == false && msitem.id == _locationId) {
-          print("$i ${widget.interactive} ${msitem.id} ${widget.itemid}");
-          print('========>>>> ${msitem.latLng[0]}, ${msitem.latLng[1]}');
+        // Your Location
+        if (widget.interactive == false &&
+            msitem.number == widget.iicontroller.locationId) {
+          _locationDescription = '${msitem.title}) ${msitem.subtitle}';
+
+          print("$i ${widget.interactive} ${msitem.number} ${widget.itemid}");
+          print(
+              '========>>>> YOUR Location $_locationDescription ${msitem.latLng[0]}, ${msitem.latLng[1]}');
           cm.add(CircleMarker(
               point: LatLng(msitem.latLng[0], msitem.latLng[1]),
               color: Colors.blue.withOpacity(0.6),
@@ -217,11 +308,15 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: FloatingActionButton(
+            key: Key('FAB${floor.id}'),
+            heroTag: null,
             backgroundColor:
                 (_selFloor == floor.id) ? Colors.orange : Colors.blue,
             child: Text(floor.id),
             mini: false,
             onPressed: () {
+              print(
+                  "======> Check Controller location id ${widget.iicontroller.locationId}");
               _changeFloor(floor.id);
             },
           ),
@@ -235,12 +330,13 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: FloatingActionButton(
+            key: Key('FABANI'),
+            heroTag: null,
             backgroundColor: Colors.red,
             child: Icon(Icons.plus_one),
             mini: false,
             onPressed: () {
-              //_addNewMSItem();
-              print('ADD NEW ITEM');
+              _addNewMSItem();
             },
           ),
         ),
@@ -251,12 +347,14 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: FloatingActionButton(
+            key: Key('FABJSON'),
+            heroTag: null,
             backgroundColor: Colors.red,
             child: Icon(Icons.download),
             mini: false,
             onPressed: () {
               // GenerateJSONConfig...
-              //_generateJSonConfig();
+              _generateJSonConfig();
             },
           ),
         ),
@@ -264,11 +362,53 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
     }
   }
 
-/*  void _generateJSonConfig() {
-    stackItems.forEach((element) {
-      print(element.runtimeType);
+  String getNewId() {
+    String newId = '999';
+    int maxId = 0;
+    iConfig?.floors[_getFloorIndexFromId(_selFloor)].items.forEach((element) {
+      int iId = int.parse(element.id);
+      if (iId > maxId) {
+        maxId = iId;
+      }
+    });
+    maxId++;
+    if (maxId < 100) {
+      newId = _getFloorIndexFromId(_selFloor).toString() +
+          maxId.toString().padLeft(2, '0');
+    } else {
+      newId = maxId.toString().padLeft(2, '0');
+    }
+
+    return newId;
+  }
+
+  void _addNewMSItem() {
+    setState(() {
+      MSItem msitem = MSItem(
+          id: getNewId(),
+          number: '0-12345',
+          title: 'title',
+          subtitle: 'subtitle',
+          description: 'description',
+          type: 'beacon',
+          latLng: [widget.iicontroller.latitude, widget.iicontroller.longitude],
+          width: 10,
+          height: 10,
+          fillcolor: 'fillcolor',
+          bordercolor: 'bordercolor',
+          iconName: 'iconName');
+
+      iConfig?.floors[_getFloorIndexFromId(_selFloor)].items.add(msitem);
     });
 
+    if (widget.onAddNewItem != null) {
+      widget.onAddNewItem!(_selFloor);
+    } else {
+      print("onAddNewItem floor: $_selFloor");
+    }
+  }
+
+  void _generateJSonConfig() {
     if (widget.onGenerateConfig != null) {
       widget.onGenerateConfig!(iConfigToJson(iConfig!));
     } else {
@@ -277,7 +417,6 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
       print("...");
     }
   }
-*/
 
   void _changeFloor(String id) {
     setState(() {
@@ -357,21 +496,48 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
                     child: Row(
                       children: [
                         SizedBox(width: 10),
-                        Icon(Icons.my_location),
+                        Icon(
+                          Icons.circle_outlined,
+                          color: Colors.blue,
+                        ),
                         SizedBox(width: 10),
-                        Text(widget.mypositionlabel + _locationId),
+                        Expanded(
+                          child: Text(
+                            widget.mypositionlabel + _locationDescription,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        )
                       ],
                     ),
                   ),
                 if (_itemTitle != '')
                   Padding(
                     padding: const EdgeInsets.all(12.0),
+                    /*
+                    child: Text(
+                      'osti+' + _itemTitle,
+                      maxLines: 2,
+                      softWrap: true,
+                      overflow: TextOverflow.ellipsis,
+                    ),*/
+
                     child: Row(
                       children: [
                         SizedBox(width: 10),
-                        Icon(Icons.pin_drop),
+                        Icon(
+                          Icons.circle_outlined,
+                          color: Colors.red,
+                        ),
                         SizedBox(width: 10),
-                        Text(_itemTitle),
+                        Expanded(
+                          child: Text(
+                            _itemTitle,
+                            maxLines: 2,
+                            softWrap: true,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -381,6 +547,7 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
         Expanded(
           child: Container(
             //color: Colors.red,
+            color: Colors.white,
             child: Stack(
               fit: StackFit.expand,
               children: [
@@ -393,8 +560,19 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
                       padding: EdgeInsets.only(left: 0.0, right: 0.0),
                     ),
                     onTap: (latLng) {
+                      if (widget.interactive == true) {
+                        widget.iicontroller.latitude = latLng.latitude;
+                        widget.iicontroller.longitude = latLng.longitude;
+                        setState(() {
+                          _locationId = 'ND';
+                          _locationDescription =
+                              ': ${latLng.latitude}, ${latLng.longitude}';
+                        });
+                      }
+
                       print(
                           'OnTap: LatLng: ${latLng.latitude}, ${latLng.longitude}');
+
                       setState(() {
                         // TODO  forse da rimuovere
                         mapController.fitBounds(_curBounds,
@@ -419,7 +597,8 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
                       maxNativeZoom: 30,
                     ),*/
                     OverlayImageLayerOptions(overlayImages: overlayImages),
-                    CircleLayerOptions(circles: _getMarkers()),
+                    CircleLayerOptions(circles: _getCircles()),
+                    MarkerLayerOptions(markers: _getMarkers()),
                   ],
                 ),
                 Positioned(

@@ -90,13 +90,13 @@ class MSItem {
     required this.iconName,
   });
 
-  final String id;
-  final String number;
-  final String title;
-  final String subtitle;
-  final String description;
-  final String type;
-  final List<double> latLng;
+  String id;
+  String number;
+  String title;
+  String subtitle;
+  String description;
+  String type;
+  List<double> latLng;
   int width;
   int height;
   String fillcolor;

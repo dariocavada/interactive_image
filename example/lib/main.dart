@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:interactive_image/interactive_image.dart';
 
-import 'package:flutter/rendering.dart';
+// import 'package:flutter/rendering.dart';
 
-import 'animated_map.dart';
-import 'image_map.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
+
+InteractiveImageController interactiveImageController =
+    new InteractiveImageController();
 
 void main() {
   /*debugPaintSizeEnabled = true;
@@ -48,8 +50,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   String _itemid = '';
-  InteractiveImageController interactiveImageController =
-      new InteractiveImageController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -99,15 +100,40 @@ class _HomeScreenState extends State<HomeScreen> {
               'https://raw.githubusercontent.com/dariocavada/interactive_image/master/data/configuration.json',*/
           /*url:
               'https://s3-eu-west-1.amazonaws.com/mkspresprod.suggesto.eu/mdgcaritro/mappe/demo/configuration.json',*/
+          /*url:
+              'https://s3-eu-west-1.amazonaws.com/mkspresprod.suggesto.eu/mdgcaritro/mappe/mcf/configuration.json',*/
           url:
-              'https://s3-eu-west-1.amazonaws.com/mkspresprod.suggesto.eu/mdgcaritro/mappe/mcf/configuration.json',
+              'https://s3-eu-west-1.amazonaws.com/mkspresprod.suggesto.eu/mdgcaritro/mappe/mdg/configuration.json',
           onGenerateConfig: (value) async {
             Share.share(value, subject: 'Interactive Image Configuration');
             /*Share.shareFiles([file.path],
               text: 'Interactive Image Configuration.json');*/
           },
-          onItemClick: (value) {
-            _itemid = value;
+          onAddNewItem: (value) {
+            // set new values in the controller and set a notification for adding a value
+            print('onAddNewItem: $value');
+          },
+          onItemClick: (value) async {
+            print('onItemClick: $value');
+
+            interactiveImageController.msitem.id = value.id; //
+            interactiveImageController.msitem.number = value.number; //
+            interactiveImageController.msitem.title = value.title; //
+            interactiveImageController.msitem.subtitle = value.subtitle; //
+            interactiveImageController.msitem.description = value.description;
+            interactiveImageController.msitem.type = value.type; // beacon
+            interactiveImageController.msitem.latLng = value.latLng; // -->
+            interactiveImageController.msitem.width = value.width;
+            interactiveImageController.msitem.height = value.height;
+            interactiveImageController.msitem.fillcolor = value.fillcolor;
+            interactiveImageController.msitem.bordercolor = value.bordercolor;
+            interactiveImageController.msitem.iconName = value.iconName;
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => FormScreen()),
+            );
+
+            //interactiveImageController.setLocationId("");
           }),
     );
   }
@@ -167,8 +193,98 @@ class _TestScreenState extends State<TestScreen> {
 
         /* url:
               'https://raw.githubusercontent.com/dariocavada/interactive_image/master/data/configuration.json',*/
+        /*url:
+            'https://s3-eu-west-1.amazonaws.com/mkspresprod.suggesto.eu/mdgcaritro/mappe/mcf/configuration.json',*/
         url:
-            'https://s3-eu-west-1.amazonaws.com/mkspresprod.suggesto.eu/mdgcaritro/mappe/mcf/configuration.json',
+            'https://s3-eu-west-1.amazonaws.com/mkspresprod.suggesto.eu/mdgcaritro/mappe/mdg/configuration.json',
+      ),
+    );
+  }
+}
+
+class FormScreen extends StatelessWidget {
+  final _formKey = GlobalKey<FormBuilderState>();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Interactive Image: Edit mode'),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.save),
+            tooltip: 'Save',
+            onPressed: () {
+              Navigator.pop(context);
+              interactiveImageController.setChangeId('test');
+            },
+          ), //IconButton
+          //IconButton
+        ],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: <Widget>[
+            FormBuilder(
+              key: _formKey,
+              child: Column(
+                children: <Widget>[
+                  FormBuilderTextField(
+                    name: 'id',
+                    initialValue: interactiveImageController.msitem.id,
+                    decoration: InputDecoration(
+                      labelText: 'id',
+                    ),
+                    onChanged: (value) => {
+                      interactiveImageController.msitem.id = value!,
+                    },
+                  ),
+                  FormBuilderTextField(
+                    name: 'number',
+                    initialValue: interactiveImageController.msitem.number,
+                    decoration: InputDecoration(
+                      labelText: 'number',
+                    ),
+                    onChanged: (value) => {
+                      interactiveImageController.msitem.number = value!,
+                    },
+                  ),
+                  FormBuilderTextField(
+                    name: 'title',
+                    initialValue: interactiveImageController.msitem.title,
+                    decoration: InputDecoration(
+                      labelText: 'title',
+                    ),
+                    onChanged: (value) => {
+                      interactiveImageController.msitem.title = value!,
+                    },
+                  ),
+                  FormBuilderTextField(
+                    name: 'subtitle',
+                    initialValue: interactiveImageController.msitem.subtitle,
+                    decoration: InputDecoration(
+                      labelText: 'subtitle',
+                    ),
+                    onChanged: (value) => {
+                      interactiveImageController.msitem.subtitle = value!,
+                    },
+                  ),
+                  FormBuilderTextField(
+                    name: 'description',
+                    initialValue: interactiveImageController.msitem.description,
+                    decoration: InputDecoration(
+                      labelText: 'description',
+                    ),
+                    onChanged: (value) => {
+                      interactiveImageController.msitem.description = value!,
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
