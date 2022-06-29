@@ -1,11 +1,14 @@
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:share_plus/share_plus.dart';
+//import 'package:share_plus/share_plus.dart';
 import 'package:interactive_image/interactive_image.dart';
 
 // import 'package:flutter/rendering.dart';
 
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'testdrag.dart';
+import 'package:path_provider/path_provider.dart';
 
 InteractiveImageController interactiveImageController =
     new InteractiveImageController();
@@ -44,7 +47,49 @@ class MyApp extends StatelessWidget {
   }
 }
 
+class ConfigStorage {
+  Future<String> get _localPath async {
+    final directory = await getDownloadsDirectory();
+
+    return directory?.path ?? '.';
+  }
+
+  Future<File> get _localFile async {
+    final path = await _localPath;
+    String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
+
+    if (selectedDirectory == null) {
+      print('$path/interactiveimageconfig.json');
+      return File('$path/interactiveimageconfig.json');
+    } else {
+      return File('$selectedDirectory/interactiveimageconfig.json');
+    }
+  }
+
+  Future<String> readConfig() async {
+    try {
+      final file = await _localFile;
+
+      final content = await file.readAsString();
+
+      return content;
+    } catch (e) {
+      // If encountering an error, return 0
+      return '';
+    }
+  }
+
+  Future<File> writeConfig(String config) async {
+    final file = await _localFile;
+
+    // Write the file
+    return file.writeAsString(config);
+  }
+}
+
 class HomeScreen extends StatefulWidget {
+  final ConfigStorage storage = new ConfigStorage();
+
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
@@ -92,6 +137,7 @@ class _HomeScreenState extends State<HomeScreen> {
           interactive: true,
           toolbarPosition: ToolbarPosition.top,
           iicontroller: interactiveImageController,
+          openstreetmap: false,
           // Selected item id to show on the map (filtered only if interactive: false)
           // itemid: '1',
           // If we have a translation of the item, otherwise take the item title value
@@ -104,12 +150,12 @@ class _HomeScreenState extends State<HomeScreen> {
               'https://s3-eu-west-1.amazonaws.com/mkspresprod.suggesto.eu/mdgcaritro/mappe/demo/configuration.json',*/
           /*url:
               'https://s3-eu-west-1.amazonaws.com/mkspresprod.suggesto.eu/mdgcaritro/mappe/mcf/configuration.json',*/
+          /*url:
+              'https://s3-eu-west-1.amazonaws.com/mkspresprod.suggesto.eu/mdgcaritro/mappe/mdg/configuration.json',*/
           url:
-              'https://s3-eu-west-1.amazonaws.com/mkspresprod.suggesto.eu/mdgcaritro/mappe/mdg/configuration.json',
+              'https://s3-eu-west-1.amazonaws.com/mkspresprod.suggesto.eu/mdgcaritro/mappe/istladin/configuration.json',
           onGenerateConfig: (value) async {
-            Share.share(value, subject: 'Interactive Image Configuration');
-            /*Share.shareFiles([file.path],
-              text: 'Interactive Image Configuration.json');*/
+            widget.storage.writeConfig(value);
           },
           onAddNewItem: (value) {
             // set new values in the controller and set a notification for adding a value
@@ -197,8 +243,10 @@ class _TestScreenState extends State<TestScreen> {
               'https://raw.githubusercontent.com/dariocavada/interactive_image/master/data/configuration.json',*/
         /*url:
             'https://s3-eu-west-1.amazonaws.com/mkspresprod.suggesto.eu/mdgcaritro/mappe/mcf/configuration.json',*/
+        /*url:
+            'https://s3-eu-west-1.amazonaws.com/mkspresprod.suggesto.eu/mdgcaritro/mappe/mdg/configuration.json',*/
         url:
-            'https://s3-eu-west-1.amazonaws.com/mkspresprod.suggesto.eu/mdgcaritro/mappe/mdg/configuration.json',
+            'https://s3-eu-west-1.amazonaws.com/mkspresprod.suggesto.eu/mdgcaritro/mappe/istladin/configuration.json',
       ),
     );
   }

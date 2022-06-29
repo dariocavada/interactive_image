@@ -1,6 +1,6 @@
 name: interactive_image
 description: Interactive image widget for simple indoor maps.
-version: 0.0.3
+version: 0.0.4
 homepage:
 
 environment:
@@ -11,10 +11,11 @@ dependencies:
   flutter:
     sdk: flutter
 
-  flutter_cache_manager: ^3.1.2
-  cached_network_image: ^3.1.0
-  path_provider: ^2.0.2
+  flutter_cache_manager: ^3.3.0
+  cached_network_image: ^3.2.1
+  path_provider: ^2.0.11
   flutter_map: ^1.1.1
+  flutter_map_dragmarker: ^2.0.0
 
 dev_dependencies:
   flutter_test:

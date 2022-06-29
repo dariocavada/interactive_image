@@ -7,6 +7,7 @@ import 'package:interactive_image/src/shared/icache_manager.dart';
 import '../controllers/interactive_image_controller.dart';
 //import 'measured_size.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map_dragmarker/dragmarker.dart';
 import 'package:latlong2/latlong.dart';
 
 typedef IIMStringCallback(String value);
@@ -80,7 +81,7 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
     widget.iicontroller.addListener(_iicListener);
 
     _itemTitle = widget.itemtitle;
-    WidgetsBinding.instance?.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       _asyncInitializer();
     });
   }
@@ -222,6 +223,16 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
   List<Marker> _getMarkers() {
     if (widget.interactive) {
       return _getAllMarkers();
+      //return _getDraggableMarkers();
+    } else {
+      return [];
+    }
+  }
+
+  List<DragMarker> _getDraggableMarkers() {
+    if (widget.interactive) {
+      return _getAllDraggableMarkers();
+      //return _getDraggableMarkers();
     } else {
       return [];
     }
@@ -260,6 +271,57 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
                     }
                   },
                   child: Icon(Icons.circle_rounded)),
+            ),
+          ),
+        );
+      });
+    }
+    return cm;
+  }
+
+  List<DragMarker> _getAllDraggableMarkers() {
+    print('========>>>> _getDraggableMarkers');
+    int i = 0;
+    List<DragMarker> cm = [];
+    if (iConfig != null) {
+      iConfig!.floors[_getFloorIndexFromId(_selFloor)].items.forEach((msitem) {
+        // If not in edit mode add only the itemid passed as parameter
+        i++;
+        print("$i ${widget.interactive} ${msitem.id} ${widget.itemid}");
+        print('========>>>> ${msitem.latLng[0]}, ${msitem.latLng[1]}');
+        cm.add(
+          DragMarker(
+            width: 32.0,
+            height: 32.0,
+            point: LatLng(msitem.latLng[0], msitem.latLng[1]),
+            onDragStart: (details, point) => print("Start point $point"),
+            onDragEnd: (details, point) {
+              print("End point $point");
+              msitem.latLng[0] = point.latitude;
+              msitem.latLng[1] = point.longitude;
+            },
+            onDragUpdate: (details, point) {},
+            onTap: (point) {
+              String msg =
+                  'Marker: ${msitem.id} - ${msitem.number} - ${msitem.title}: ${msitem.subtitle}';
+
+              if (widget.onItemClick != null) {
+                widget.onItemClick!(msitem);
+                print(msitem.id);
+                setState(() {
+                  _itemTitle = msg;
+                });
+              } else {
+                /*ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(
+                  content: Text(msg),
+                ));*/
+              }
+            },
+            onLongPress: (point) {
+              print("on long press");
+            },
+            builder: (ctx) => Container(
+              child: Icon(Icons.circle_rounded),
             ),
           ),
         );
@@ -352,7 +414,7 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
             child: Icon(Icons.plus_one),
             mini: false,
             onPressed: () {
-              _addNewMSItem();
+              _addNewMSItem(context);
             },
           ),
         ),
@@ -398,29 +460,44 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
     return newId;
   }
 
-  void _addNewMSItem() {
-    setState(() {
-      MSItem msitem = MSItem(
-          id: getNewId(),
-          number: '0-12345',
-          title: 'title',
-          subtitle: 'subtitle',
-          description: 'description',
-          type: 'beacon',
-          latLng: [widget.iicontroller.latitude, widget.iicontroller.longitude],
-          width: 10,
-          height: 10,
-          fillcolor: 'fillcolor',
-          bordercolor: 'bordercolor',
-          iconName: 'iconName');
-
-      iConfig?.floors[_getFloorIndexFromId(_selFloor)].items.add(msitem);
-    });
-
-    if (widget.onAddNewItem != null) {
-      widget.onAddNewItem!(_selFloor);
+  void _addNewMSItem(context) {
+    if (widget.iicontroller.latitude == 0) {
+      print("AlertDialog floor: ${widget.iicontroller.latitude}");
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: Text("Attenzione"),
+          content: Text(
+              "Clicca in un punto sulla mappa e poi clicca su +1 per aggiungere un POI. E' possibile in seguito spostare il POI trascinandolo"),
+        ),
+      );
     } else {
-      print("onAddNewItem floor: $_selFloor");
+      setState(() {
+        MSItem msitem = MSItem(
+            id: getNewId(),
+            number: '0-12345',
+            title: 'title',
+            subtitle: 'subtitle',
+            description: 'description',
+            type: 'beacon',
+            latLng: [
+              widget.iicontroller.latitude,
+              widget.iicontroller.longitude
+            ],
+            width: 10,
+            height: 10,
+            fillcolor: 'fillcolor',
+            bordercolor: 'bordercolor',
+            iconName: 'iconName');
+
+        iConfig?.floors[_getFloorIndexFromId(_selFloor)].items.add(msitem);
+
+        if (widget.onAddNewItem != null) {
+          widget.onAddNewItem!(_selFloor);
+        } else {
+          print("onAddNewItem floor: $_selFloor");
+        }
+      });
     }
   }
 
@@ -478,11 +555,13 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
           imageProvider: NetworkImage(url),
         ),
       );
-      mapController.fitBounds(_curBounds,
-          options: FitBoundsOptions(
-            maxZoom: 24,
-            padding: EdgeInsets.only(left: 0, right: 0),
-          ));
+      mapController.fitBounds(
+        _curBounds,
+        options: FitBoundsOptions(
+          maxZoom: 24,
+          padding: EdgeInsets.only(left: 0, right: 0),
+        ),
+      );
     }
 
     /*stackItems.add(Positioned(
@@ -609,6 +688,10 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
                     zoom: 20.0,
                     maxZoom: 24.0,
                     minZoom: 9.0,
+                    allowPanningOnScrollingParent: false,
+                    plugins: [
+                      DragMarkerPlugin(),
+                    ],
                     interactiveFlags:
                         InteractiveFlag.pinchZoom | InteractiveFlag.drag,
                   ),
@@ -623,7 +706,8 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
                       ),
                     OverlayImageLayerOptions(overlayImages: overlayImages),
                     CircleLayerOptions(circles: _getCircles()),
-                    MarkerLayerOptions(markers: _getMarkers()),
+                    DragMarkerPluginOptions(markers: _getDraggableMarkers()),
+                    //MarkerLayerOptions(markers: _getMarkers()),
                   ],
                 ),
                 if (widget.toolbarPosition == ToolbarPosition.right)
