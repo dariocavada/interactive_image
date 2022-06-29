@@ -5,6 +5,7 @@ import 'package:interactive_image/interactive_image.dart';
 // import 'package:flutter/rendering.dart';
 
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'testdrag.dart';
 
 InteractiveImageController interactiveImageController =
     new InteractiveImageController();
@@ -77,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 context,
                 MaterialPageRoute(builder: (context) {
                   return TestScreen(
-                    itemid: '101',
+                    itemid: _itemid,
                   );
                 }),
               );
@@ -89,6 +90,7 @@ class _HomeScreenState extends State<HomeScreen> {
       body: InteractiveImageMap(
           clearcache: false,
           interactive: true,
+          toolbarPosition: ToolbarPosition.top,
           iicontroller: interactiveImageController,
           // Selected item id to show on the map (filtered only if interactive: false)
           // itemid: '1',
@@ -128,11 +130,11 @@ class _HomeScreenState extends State<HomeScreen> {
             interactiveImageController.msitem.fillcolor = value.fillcolor;
             interactiveImageController.msitem.bordercolor = value.bordercolor;
             interactiveImageController.msitem.iconName = value.iconName;
+
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => FormScreen()),
             );
-
             //interactiveImageController.setLocationId("");
           }),
     );
@@ -218,7 +220,8 @@ class FormScreen extends StatelessWidget {
               Navigator.pop(context);
               interactiveImageController.setChangeId('test');
             },
-          ), //IconButton
+          ),
+
           //IconButton
         ],
       ),

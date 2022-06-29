@@ -229,7 +229,7 @@ class AnimatedMapControllerPageState extends State<AnimatedMapControllerPage>
                   //slideOnBoundaries: false,
                   //adaptiveBoundaries: true,
                   //boundsOptions: FitBoundsOptions,
-                  onTap: (latLng) {
+                  onTap: (tapPosition, latLng) {
                     print('Lat: ${latLng.latitude}, Lng:${latLng.latitude}');
                     setState(() {
                       c.latitude = latLng.latitude;

@@ -12,20 +12,29 @@ import 'package:latlong2/latlong.dart';
 typedef IIMStringCallback(String value);
 typedef IIMSItemCallback(MSItem value);
 
+class ToolbarPosition {
+  static const left = 0;
+  static const top = 1;
+  static const bottom = 2;
+  static const right = 3;
+}
+
 class InteractiveImageMap extends StatefulWidget {
-  InteractiveImageMap({
-    Key? key,
-    required this.url,
-    required this.iicontroller,
-    this.interactive = false,
-    this.clearcache = true,
-    this.itemid = '',
-    this.itemtitle = '',
-    this.mypositionlabel = '',
-    this.onGenerateConfig,
-    this.onAddNewItem,
-    this.onItemClick,
-  }) : super(key: key);
+  InteractiveImageMap(
+      {Key? key,
+      required this.url,
+      required this.iicontroller,
+      this.interactive = false,
+      this.openstreetmap = false,
+      this.clearcache = true,
+      this.itemid = '',
+      this.itemtitle = '',
+      this.mypositionlabel = '',
+      this.onGenerateConfig,
+      this.onAddNewItem,
+      this.onItemClick,
+      this.toolbarPosition = ToolbarPosition.right})
+      : super(key: key);
 
   final InteractiveImageController iicontroller;
   final String url;
@@ -33,7 +42,9 @@ class InteractiveImageMap extends StatefulWidget {
   final String itemtitle;
   final String mypositionlabel;
   final bool interactive;
+  final bool openstreetmap;
   final bool clearcache;
+  final int toolbarPosition;
   final IIMStringCallback? onGenerateConfig;
   final IIMStringCallback? onAddNewItem;
   final IIMSItemCallback? onItemClick;
@@ -57,6 +68,7 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
   String _itemTitle = '';
   String _locationId = '';
   String _locationDescription = '';
+  String _mapTitle = '';
   IConfig? iConfig;
 
   @override
@@ -114,7 +126,7 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
               if (widget.interactive == false &&
                   msitem.number == widget.iicontroller.locationId) {
                 _locationDescription =
-                    '${msitem.title}) ${msitem.subtitle} [${floor.id}]';
+                    '${msitem.title}) ${msitem.subtitle} (${floor.label})';
               }
             });
           });
@@ -304,15 +316,19 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
   void _addFloorButtons() {
     floatinActionButtons.clear();
     iConfig!.floors.forEach((floor) {
+      if (_selFloor == floor.id) {
+        _mapTitle = floor.title;
+      }
+
       floatinActionButtons.add(
         Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(3.0),
           child: FloatingActionButton(
             key: Key('FAB${floor.id}'),
             heroTag: null,
             backgroundColor:
                 (_selFloor == floor.id) ? Colors.orange : Colors.blue,
-            child: Text(floor.id),
+            child: Text(floor.label),
             mini: false,
             onPressed: () {
               print(
@@ -507,7 +523,15 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
-                        )
+                        ),
+                        /*FloatingActionButton(
+                          key: Key('FABlocation'),
+                          heroTag: null,
+                          backgroundColor: Colors.blue,
+                          child: Text('1'),
+                          mini: true,
+                          onPressed: () => {},
+                        ),*/
                       ],
                     ),
                   ),
@@ -559,7 +583,7 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
                       maxZoom: 24,
                       padding: EdgeInsets.only(left: 0.0, right: 0.0),
                     ),
-                    onTap: (latLng) {
+                    onTap: (tapPos, latLng) {
                       if (widget.interactive == true) {
                         widget.iicontroller.latitude = latLng.latitude;
                         widget.iicontroller.longitude = latLng.longitude;
@@ -584,34 +608,55 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
                     },
                     zoom: 20.0,
                     maxZoom: 24.0,
-                    minZoom: 18.0,
+                    minZoom: 9.0,
                     interactiveFlags:
                         InteractiveFlag.pinchZoom | InteractiveFlag.drag,
                   ),
                   layers: [
-                    /*TileLayerOptions(
-                      urlTemplate:
-                          'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                      subdomains: ['a', 'b', 'c'],
-                      maxZoom: 30,
-                      maxNativeZoom: 30,
-                    ),*/
+                    if (widget.openstreetmap)
+                      TileLayerOptions(
+                        urlTemplate:
+                            'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                        subdomains: ['a', 'b', 'c'],
+                        maxZoom: 30,
+                        maxNativeZoom: 30,
+                      ),
                     OverlayImageLayerOptions(overlayImages: overlayImages),
                     CircleLayerOptions(circles: _getCircles()),
                     MarkerLayerOptions(markers: _getMarkers()),
                   ],
                 ),
-                Positioned(
-                  right: 10,
-                  top: 10,
-                  child: Column(
-                    children: floatinActionButtons,
+                if (widget.toolbarPosition == ToolbarPosition.right)
+                  Positioned(
+                    right: 10,
+                    top: 10,
+                    child: Column(
+                      children: floatinActionButtons,
+                    ),
                   ),
-                ),
+                if (widget.toolbarPosition == ToolbarPosition.top)
+                  Positioned(
+                    left: 10,
+                    top: 10,
+                    child: Row(
+                      children: floatinActionButtons,
+                    ),
+                  )
               ],
             ),
           ),
         ),
+        if (_mapTitle != '')
+          Container(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                _mapTitle,
+                maxLines: 2,
+                overflow: TextOverflow.fade,
+              ),
+            ),
+          )
       ],
     );
   }

@@ -72,7 +72,7 @@ class _InteractiveImageState extends State<InteractiveImage> {
     });
 
     _itemTitle = widget.itemtitle;
-    WidgetsBinding.instance?.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       _asyncInitializer();
     });
   }

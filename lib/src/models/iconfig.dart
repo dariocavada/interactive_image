@@ -35,6 +35,7 @@ class IConfig {
 class Floor {
   Floor({
     required this.id,
+    required this.label,
     required this.title,
     required this.subtitle,
     required this.description,
@@ -44,6 +45,7 @@ class Floor {
   });
 
   final String id;
+  final String label;
   final String title;
   final String subtitle;
   final String description;
@@ -53,6 +55,7 @@ class Floor {
 
   factory Floor.fromJson(Map<String, dynamic> json) => Floor(
         id: json["id"] ?? '',
+        label: json["label"] ?? json["id"] ?? "",
         title: json["title"] ?? '',
         subtitle: json["subtitle"] ?? '',
         description: json["description"] ?? '',
@@ -64,6 +67,7 @@ class Floor {
 
   Map<String, dynamic> toJson() => {
         "id": id,
+        "label": label,
         "title": title,
         "subtitle": subtitle,
         "description": description,

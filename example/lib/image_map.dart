@@ -110,14 +110,16 @@ MapOptions(
     );
   }
 
-  void _handleTap(LatLng latlng) {
+  void _handleTap(TapPosition tapPos, LatLng latlng) {
     print('${latlng.latitude} ${latlng.longitude} ');
     setState(() {
       tappedPoints.add(latlng);
-      mapController.fitBounds(_bounds,
-          options: FitBoundsOptions(
-            padding: EdgeInsets.only(left: 15, right: 15),
-          ));
+      mapController.fitBounds(
+        _bounds,
+        options: FitBoundsOptions(
+          padding: EdgeInsets.only(left: 15, right: 15),
+        ),
+      );
     });
   }
 }
