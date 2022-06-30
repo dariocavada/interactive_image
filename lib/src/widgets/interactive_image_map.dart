@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:interactive_image/src/models/iconfig.dart';
@@ -552,7 +553,8 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
           bounds: _curBounds,
           opacity: 1,
           gaplessPlayback: true,
-          imageProvider: NetworkImage(url),
+          //imageProvider: NetworkImage(url),
+          imageProvider: CachedNetworkImageProvider(url),
         ),
       );
       mapController.fitBounds(

@@ -1,6 +1,6 @@
 name: interactive_image
 description: Interactive image widget for simple indoor maps.
-version: 0.0.4
+version: 0.0.5
 homepage:
 
 environment:
