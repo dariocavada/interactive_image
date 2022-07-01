@@ -125,6 +125,8 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
           iConfig!.floors.forEach((floor) {
             floor.items.forEach((msitem) {
               // Your Location
+              print(
+                  'InteractiveImageMap forEach ${msitem.number} == ${widget.iicontroller.locationId}');
               if (widget.interactive == false &&
                   msitem.number == widget.iicontroller.locationId) {
                 _locationDescription =

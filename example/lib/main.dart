@@ -216,8 +216,13 @@ class _TestScreenState extends State<TestScreen> {
             ),
             child: PopupMenuButton<int>(
                 color: Colors.orange,
-                onSelected: (item) =>
-                    interactiveImageController.setLocationId('$item'),
+                onSelected: (item) {
+                  if (item < 99) {
+                    interactiveImageController.setLocationId('00$item');
+                  } else {
+                    interactiveImageController.setLocationId('$item');
+                  }
+                },
                 itemBuilder: (context) {
                   return List.generate(
                       interactiveImageController.locationList.length, (index) {
