@@ -144,7 +144,6 @@ class _InteractiveImageState extends State<InteractiveImage> {
     //var a = iConfig!.floors[_getFloorIndexFromId(_selFloor)];
     stackItems.clear();
     _calculateSizeAndPosition();
-    print('*********** !!!!!!!! Get Stack Items');
     _addImageItem();
     _addMovableStackItems();
     return stackItems;

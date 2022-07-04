@@ -26,13 +26,11 @@ class InteractiveImageController extends ChangeNotifier {
   List<String> locationList = [];
 
   void setChangeId(String value) {
-    print('InteractiveImageController setChangeId $value');
     this.changeId = value;
     notifyListeners();
   }
 
   void setLocationId(String value) {
-    print('InteractiveImageController setLocationId $value');
     this.locationId = value;
     notifyListeners();
   }

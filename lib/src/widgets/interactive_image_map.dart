@@ -88,9 +88,6 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
   }
 
   void _iicListener() {
-    print(
-        'InteractiveImageMap receive notification ${widget.iicontroller.locationId}');
-
     if (widget.interactive == true) {
       if (iConfig != null) {
         iConfig!.floors.forEach((floor) {
@@ -98,8 +95,6 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
             // Your Location
 
             if (msitem.id == widget.iicontroller.msitem.id) {
-              print(
-                  'InteractiveImageMap modify with ${widget.iicontroller.msitem.title}');
               setState(() {
                 msitem.id = widget.iicontroller.msitem.id;
                 msitem.number = widget.iicontroller.msitem.number;
@@ -116,17 +111,12 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
 
     if (widget.iicontroller.locationId != '') {
       setState(() {
-        print(
-            'InteractiveImageMap new locationid: ${widget.iicontroller.locationId}');
         _locationId = widget.iicontroller.locationId;
-        //_locationDescription = _locationId + 'inserirlo qui ?';
 
         if (iConfig != null) {
           iConfig!.floors.forEach((floor) {
             floor.items.forEach((msitem) {
               // Your Location
-              print(
-                  'InteractiveImageMap forEach ${msitem.number} == ${widget.iicontroller.locationId}');
               if (widget.interactive == false &&
                   msitem.number == widget.iicontroller.locationId) {
                 _locationDescription =
@@ -179,7 +169,6 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
   }
 
   void _addErrorElement(String text) {
-    print('MANAGE _addErrorElement ELEMENT $text');
     /*stackItems.clear();
     setState(() {
       stackItems.add(
@@ -207,7 +196,6 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
         widget.iicontroller.locationList.add(msitem.id);
         if (itemId == msitem.number) {
           itemFloor = floor.id;
-          print('$itemId - ${msitem.number} - ${floor.id}');
         }
       });
     });
@@ -242,15 +230,12 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
   }
 
   List<Marker> _getAllMarkers() {
-    print('========>>>> _getAllMarkers');
     int i = 0;
     List<Marker> cm = [];
     if (iConfig != null) {
       iConfig!.floors[_getFloorIndexFromId(_selFloor)].items.forEach((msitem) {
         // If not in edit mode add only the itemid passed as parameter
         i++;
-        print("$i ${widget.interactive} ${msitem.id} ${widget.itemid}");
-        print('========>>>> ${msitem.latLng[0]}, ${msitem.latLng[1]}');
         cm.add(
           Marker(
             width: 32.0,
@@ -263,7 +248,6 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
                         'Marker: ${msitem.id} - ${msitem.number} - ${msitem.title}: ${msitem.subtitle}';
                     if (widget.onItemClick != null) {
                       widget.onItemClick!(msitem);
-                      print(msitem.id);
                       setState(() {
                         _itemTitle = msg;
                       });
@@ -283,23 +267,19 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
   }
 
   List<DragMarker> _getAllDraggableMarkers() {
-    print('========>>>> _getDraggableMarkers');
     int i = 0;
     List<DragMarker> cm = [];
     if (iConfig != null) {
       iConfig!.floors[_getFloorIndexFromId(_selFloor)].items.forEach((msitem) {
         // If not in edit mode add only the itemid passed as parameter
         i++;
-        print("$i ${widget.interactive} ${msitem.id} ${widget.itemid}");
-        print('========>>>> ${msitem.latLng[0]}, ${msitem.latLng[1]}');
         cm.add(
           DragMarker(
             width: 32.0,
             height: 32.0,
             point: LatLng(msitem.latLng[0], msitem.latLng[1]),
-            onDragStart: (details, point) => print("Start point $point"),
+            onDragStart: (details, point) => (print("Start point $point")),
             onDragEnd: (details, point) {
-              print("End point $point");
               msitem.latLng[0] = point.latitude;
               msitem.latLng[1] = point.longitude;
             },
@@ -310,7 +290,6 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
 
               if (widget.onItemClick != null) {
                 widget.onItemClick!(msitem);
-                print(msitem.id);
                 setState(() {
                   _itemTitle = msg;
                 });
@@ -334,7 +313,6 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
   }
 
   List<CircleMarker> _getPosAndDestinationCircles() {
-    print('========>>>> _getPosAndDestinationMarkers ${widget.itemid}');
     int i = 0;
     List<CircleMarker> cm = [];
     if (iConfig != null) {
@@ -344,8 +322,6 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
 
         // POI
         if (widget.interactive == false && msitem.number == widget.itemid) {
-          print("$i ${widget.interactive} ${msitem.id} ${widget.itemid}");
-          print('========>>>> POI ${msitem.latLng[0]}, ${msitem.latLng[1]}');
           cm.add(CircleMarker(
               point: LatLng(msitem.latLng[0], msitem.latLng[1]),
               color: Colors.amber.withOpacity(0.6),
@@ -361,9 +337,6 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
             msitem.number == widget.iicontroller.locationId) {
           _locationDescription = '${msitem.title}) ${msitem.subtitle}';
 
-          print("$i ${widget.interactive} ${msitem.number} ${widget.itemid}");
-          print(
-              '========>>>> YOUR Location $_locationDescription ${msitem.latLng[0]}, ${msitem.latLng[1]}');
           cm.add(CircleMarker(
               point: LatLng(msitem.latLng[0], msitem.latLng[1]),
               color: Colors.blue.withOpacity(0.6),
@@ -465,7 +438,6 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
 
   void _addNewMSItem(context) {
     if (widget.iicontroller.latitude == 0) {
-      print("AlertDialog floor: ${widget.iicontroller.latitude}");
       showDialog(
         context: context,
         builder: (_) => AlertDialog(
@@ -508,7 +480,6 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
     if (widget.onGenerateConfig != null) {
       widget.onGenerateConfig!(iConfigToJson(iConfig!));
     } else {
-      print("Config");
       print(iConfigToJson(iConfig!));
       print("...");
     }
