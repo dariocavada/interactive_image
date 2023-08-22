@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:positioned_tap_detector_2/positioned_tap_detector_2.dart';
+//import 'package:positioned_tap_detector_2/positioned_tap_detector_2.dart';
 
 class OverlayImagePage extends StatefulWidget {
   static const String route = 'overlay_image';
@@ -75,13 +75,13 @@ MapOptions(
                   interactiveFlags:
                       InteractiveFlag.pinchZoom | InteractiveFlag.drag,
                 ),
-                layers: [
-                  TileLayerOptions(
+                children: [
+                  TileLayer(
                       urlTemplate:
                           'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
                       subdomains: ['a', 'b', 'c']),
-                  OverlayImageLayerOptions(overlayImages: overlayImages),
-                  MarkerLayerOptions(
+                  OverlayImageLayer(overlayImages: overlayImages),
+                  MarkerLayer(
                     markers: [
                       Marker(
                         width: 20.0,

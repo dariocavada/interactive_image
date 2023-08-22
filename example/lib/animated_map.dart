@@ -24,7 +24,7 @@ class AnimatedMapControllerPageState extends State<AnimatedMapControllerPage>
   int curFloor = 0;
 
   List<String> imageUrls = [
-    'https://s3-eu-west-1.amazonaws.com/mkspresprod.suggesto.eu/mdgcaritro/mappe/mcf/mcf-0.jpg',
+    'https://s3-t-1.amazonaws.com/mkspresuggesto.eu/mdgcaritro/mappe/mcf/mcf-0.jpg',
     'https://s3-eu-west-1.amazonaws.com/mkspresprod.suggesto.eu/mdgcaritro/mappe/mcf/mcf-1.jpg',
     'https://s3-eu-west-1.amazonaws.com/mkspresprod.suggesto.eu/mdgcaritro/mappe/mcf/mcf-2.jpg',
   ];
@@ -179,9 +179,7 @@ class AnimatedMapControllerPageState extends State<AnimatedMapControllerPage>
                 children: <Widget>[
                   MaterialButton(
                     onPressed: () {
-                      var bounds = LatLngBounds();
-                      bounds.extend(a);
-                      bounds.extend(b);
+                      var bounds = LatLngBounds(a, b);
                       mapController.fitBounds(
                         bounds,
                         options: FitBoundsOptions(
@@ -193,16 +191,7 @@ class AnimatedMapControllerPageState extends State<AnimatedMapControllerPage>
                     child: Text('Fit Bounds'),
                   ),
                   MaterialButton(
-                    onPressed: () {
-                      var bounds = LatLngBounds();
-                      bounds.extend(dublin);
-                      bounds.extend(paris);
-                      bounds.extend(london);
-
-                      /*var centerZoom =
-                          mapController.centerZoomFitBounds(bounds);
-                      _animatedMapMove(centerZoom.center, centerZoom.zoom);*/
-                    },
+                    onPressed: () {},
                     child: Text('Fit Bounds animated'),
                   ),
                 ],
@@ -220,20 +209,10 @@ class AnimatedMapControllerPageState extends State<AnimatedMapControllerPage>
                     maxZoom: 24,
                     padding: EdgeInsets.only(left: 0.0, right: 0.0),
                   ),
-
-                  //center: a,
-                  /*swPanBoundary: b,
-                  nePanBoundary: a,
-                  slideOnBoundaries: true,
-                  screenSize: MediaQuery.of(context).size,*/
-                  //slideOnBoundaries: false,
-                  //adaptiveBoundaries: true,
-                  //boundsOptions: FitBoundsOptions,
                   onTap: (tapPosition, latLng) {
                     print('Lat: ${latLng.latitude}, Lng:${latLng.latitude}');
                     setState(() {
-                      c.latitude = latLng.latitude;
-                      c.longitude = latLng.longitude;
+                      c = LatLng(latLng.latitude, latLng.longitude);
                     });
                   },
                   zoom: 20.0,
@@ -242,24 +221,10 @@ class AnimatedMapControllerPageState extends State<AnimatedMapControllerPage>
                   interactiveFlags:
                       InteractiveFlag.pinchZoom | InteractiveFlag.drag,
                 ),
-                layers: [
-                  /*TileLayerOptions(
-                    urlTemplate:
-                        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                    subdomains: ['a', 'b', 'c'],
-                    maxZoom: 30,
-                    maxNativeZoom: 30,
-                  ),*/
-                  /*TileLayerOptions(
-                    urlTemplate:
-                        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
-                    maxZoom: 30,
-                    maxNativeZoom: 30,
-                  ),*/
-
-                  OverlayImageLayerOptions(overlayImages: overlayImages),
-                  MarkerLayerOptions(markers: markers),
-                  CircleLayerOptions(circles: circleMarkers),
+                children: [
+                  OverlayImageLayer(overlayImages: overlayImages),
+                  MarkerLayer(markers: markers),
+                  CircleLayer(circles: circleMarkers),
                 ],
               ),
             ),

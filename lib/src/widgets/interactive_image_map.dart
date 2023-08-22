@@ -8,7 +8,7 @@ import 'package:interactive_image/src/shared/icache_manager.dart';
 import '../controllers/interactive_image_controller.dart';
 //import 'measured_size.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:flutter_map_dragmarker/dragmarker.dart';
+import 'package:flutter_map_dragmarker/flutter_map_dragmarker.dart';
 import 'package:latlong2/latlong.dart';
 
 typedef IIMStringCallback(String value);
@@ -275,8 +275,8 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
         i++;
         cm.add(
           DragMarker(
-            width: 32.0,
-            height: 32.0,
+            size: const Size.square(50),
+            offset: const Offset(0, -20),
             point: LatLng(msitem.latLng[0], msitem.latLng[1]),
             onDragStart: (details, point) => (print("Start point $point")),
             onDragEnd: (details, point) {
@@ -302,8 +302,10 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
             onLongPress: (point) {
               print("on long press");
             },
-            builder: (ctx) => Container(
-              child: Icon(Icons.circle_rounded),
+            builder: (_, __, ___) => const Icon(
+              Icons.circle_rounded,
+              size: 50,
+              color: Colors.blueGrey,
             ),
           ),
         );
@@ -663,25 +665,25 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
                     zoom: 20.0,
                     maxZoom: 24.0,
                     minZoom: 9.0,
-                    allowPanningOnScrollingParent: false,
+                    /*allowPanningOnScrollingParent: false,
                     plugins: [
-                      DragMarkerPlugin(),
-                    ],
+                      DragMarkerPlugin(),  TODO
+                    ],*/
                     interactiveFlags:
                         InteractiveFlag.pinchZoom | InteractiveFlag.drag,
                   ),
-                  layers: [
+                  children: [
                     if (widget.openstreetmap)
-                      TileLayerOptions(
+                      TileLayer(
                         urlTemplate:
                             'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
                         subdomains: ['a', 'b', 'c'],
                         maxZoom: 30,
                         maxNativeZoom: 30,
                       ),
-                    OverlayImageLayerOptions(overlayImages: overlayImages),
-                    CircleLayerOptions(circles: _getCircles()),
-                    DragMarkerPluginOptions(markers: _getDraggableMarkers()),
+                    OverlayImageLayer(overlayImages: overlayImages),
+                    CircleLayer(circles: _getCircles()),
+                    //DragMarkerPlugin(markers: _getDraggableMarkers()), TODO
                     //MarkerLayerOptions(markers: _getMarkers()),
                   ],
                 ),
