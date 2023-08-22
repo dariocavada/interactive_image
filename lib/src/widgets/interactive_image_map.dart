@@ -230,12 +230,11 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
   }
 
   List<Marker> _getAllMarkers() {
-    int i = 0;
     List<Marker> cm = [];
     if (iConfig != null) {
       iConfig!.floors[_getFloorIndexFromId(_selFloor)].items.forEach((msitem) {
         // If not in edit mode add only the itemid passed as parameter
-        i++;
+        //i++;
         cm.add(
           Marker(
             width: 32.0,
@@ -267,12 +266,11 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
   }
 
   List<DragMarker> _getAllDraggableMarkers() {
-    int i = 0;
     List<DragMarker> cm = [];
     if (iConfig != null) {
       iConfig!.floors[_getFloorIndexFromId(_selFloor)].items.forEach((msitem) {
         // If not in edit mode add only the itemid passed as parameter
-        i++;
+        //i++;
         cm.add(
           DragMarker(
             size: const Size.square(50),

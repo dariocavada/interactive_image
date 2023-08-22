@@ -357,35 +357,33 @@ class _InteractiveImageState extends State<InteractiveImage> {
 
     final Size box = Size(1984, 1160);
 
-    if (box != null) {
-      print("$parentWidth-$parentHeight ${box.width}-${box.height}; ");
+    print("$parentWidth-$parentHeight ${box.width}-${box.height}; ");
 
-      var arx = box.width;
-      var ary = box.height;
+    var arx = box.width;
+    var ary = box.height;
 
-      var acx = parentWidth;
-      var acy = parentHeight;
+    var acx = parentWidth;
+    var acy = parentHeight;
 
-      dx = 0.0;
+    dx = 0.0;
+    dy = 0.0;
+
+    sy = 0.0;
+    sx = 0.0;
+
+    if ((arx / ary) < (acx / acy)) {
       dy = 0.0;
-
-      sy = 0.0;
-      sx = 0.0;
-
-      if ((arx / ary) < (acx / acy)) {
-        dy = 0.0;
-        sy = acy;
-        sx = arx / ary * acy;
-        dx = (acx - sx).abs() / 2;
-      } else {
-        dx = 0.0;
-        sx = acx;
-        sy = ary / arx * acx;
-        dy = (acy - sy).abs() / 2;
-      }
-
-      print('sx: $sx, sy: $sy, dx: $dx, dy: $dy');
+      sy = acy;
+      sx = arx / ary * acy;
+      dx = (acx - sx).abs() / 2;
+    } else {
+      dx = 0.0;
+      sx = acx;
+      sy = ary / arx * acx;
+      dy = (acy - sy).abs() / 2;
     }
+
+    print('sx: $sx, sy: $sy, dx: $dx, dy: $dy');
   }
 
   @override
