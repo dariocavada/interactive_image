@@ -240,7 +240,7 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
             width: 32.0,
             height: 32.0,
             point: LatLng(msitem.latLng[0], msitem.latLng[1]),
-            builder: (ctx) => Container(
+            child: Container(
               child: GestureDetector(
                   onTap: () {
                     String msg =
@@ -251,9 +251,9 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
                         _itemTitle = msg;
                       });
                     } else {
-                      ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(
+                      /*ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(
                         content: Text(msg),
-                      ));
+                      ));*/
                     }
                   },
                   child: Icon(Icons.circle_rounded)),
