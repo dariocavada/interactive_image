@@ -1,7 +1,9 @@
 
+## 6.0.0
+* Porting to flutter_map v 6.0
+
 ## 5.0.0
 * Porting to flutter_map v 5.0
-
 
 ## 0.0.2
 * Added interactivity and share the configuration json file
