@@ -313,12 +313,12 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
   }
 
   List<CircleMarker> _getPosAndDestinationCircles() {
-    int i = 0;
+    //int i = 0;
     List<CircleMarker> cm = [];
     if (iConfig != null) {
       iConfig!.floors[_getFloorIndexFromId(_selFloor)].items.forEach((msitem) {
         // If not in edit mode add only the itemid passed as parameter
-        i++;
+        //Ni++;
 
         // POI
         if (widget.interactive == false && msitem.number == widget.itemid) {
