@@ -11,7 +11,7 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:path_provider/path_provider.dart';
 
 InteractiveImageController interactiveImageController =
-    new InteractiveImageController();
+    InteractiveImageController();
 
 void main() {
   /*debugPaintSizeEnabled = true;
@@ -34,6 +34,8 @@ void main() {
 }*/
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -88,13 +90,15 @@ class ConfigStorage {
 }
 
 class HomeScreen extends StatefulWidget {
-  final ConfigStorage storage = new ConfigStorage();
+  final ConfigStorage storage = ConfigStorage();
+
+  HomeScreen({super.key});
 
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  HomeScreenState createState() => HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class HomeScreenState extends State<HomeScreen> {
   String _itemid = '';
 
   @override
@@ -113,10 +117,10 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),*/
       appBar: AppBar(
-        title: Text('Interactive Image: Edit mode'),
+        title: const Text('Interactive Image: Edit mode'),
         actions: <Widget>[
           IconButton(
-            icon: Icon(Icons.arrow_forward),
+            icon: const Icon(Icons.arrow_forward),
             tooltip: 'Go to test page',
             onPressed: () {
               Navigator.push(
@@ -135,7 +139,8 @@ class _HomeScreenState extends State<HomeScreen> {
       body: InteractiveImageMap(
           clearcache: false,
           interactive: true,
-          toolbarPosition: ToolbarPosition.top,
+          //toolbarPosition: ToolbarPosition.top,
+          toolbarPosition: ToolbarPosition.right,
           iicontroller: interactiveImageController,
           openstreetmap: false,
           // Selected item id to show on the map (filtered only if interactive: false)
@@ -150,10 +155,10 @@ class _HomeScreenState extends State<HomeScreen> {
               'https://s3-eu-west-1.amazonaws.com/mkspresprod.suggesto.eu/mdgcaritro/mappe/demo/configuration.json',*/
           /*url:
               'https://s3-eu-west-1.amazonaws.com/mkspresprod.suggesto.eu/mdgcaritro/mappe/mcf/configuration.json',*/
-          /*url:
-              'https://s3-eu-west-1.amazonaws.com/mkspresprod.suggesto.eu/mdgcaritro/mappe/mdg/configuration.json',*/
           url:
-              'https://s3-eu-west-1.amazonaws.com/mkspresprod.suggesto.eu/mdgcaritro/mappe/istladin/configuration.json',
+              'https://s3-eu-west-1.amazonaws.com/mkspresprod.suggesto.eu/mdgcaritro/mappe/mdg/configuration.json',
+          /*url:
+              'https://s3-eu-west-1.amazonaws.com/mkspresprod.suggesto.eu/mdgcaritro/mappe/istladin/configuration.json',*/
           onGenerateConfig: (value) async {
             widget.storage.writeConfig(value);
           },

@@ -82,6 +82,7 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
     widget.iicontroller.addListener(_iicListener);
 
     _itemTitle = widget.itemtitle;
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _asyncInitializer();
     });
@@ -223,7 +224,6 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
   List<DragMarker> _getDraggableMarkers() {
     if (widget.interactive) {
       return _getAllDraggableMarkers();
-      //return _getDraggableMarkers();
     } else {
       return [];
     }
@@ -256,7 +256,7 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
                       ));*/
                     }
                   },
-                  child: Icon(Icons.circle_rounded)),
+                  child: Icon(Icons.circle)),
             ),
           ),
         );
@@ -387,7 +387,7 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
             key: Key('FABANI'),
             heroTag: null,
             backgroundColor: Colors.red,
-            child: Icon(Icons.plus_one),
+            child: Icon(Icons.plus_one), // plus_one
             mini: false,
             onPressed: () {
               _addNewMSItem(context);
@@ -395,6 +395,8 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
           ),
         ),
       );
+
+      // Quando i piani sono troppi, non si vede questo...
 
       // Add a export for generating JSON
       floatinActionButtons.add(
@@ -507,11 +509,6 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
       double ld =
           iConfig!.floors[_getFloorIndexFromId(_selFloor)].latLngBounds[1][1];
 
-      /*_curBounds.extendBounds(LatLngBounds(
-        LatLng(la, lb),
-        LatLng(lc, ld),
-      ));*/
-
       _curBounds = LatLngBounds(
         LatLng(la, lb),
         LatLng(lc, ld),
@@ -526,28 +523,16 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
           bounds: _curBounds,
           opacity: 1,
           gaplessPlayback: true,
-          //imageProvider: NetworkImage(url),
           imageProvider: CachedNetworkImageProvider(url),
         ),
       );
-      mapController.fitBounds(
-        _curBounds,
-        options: FitBoundsOptions(
-          maxZoom: 24,
-          padding: EdgeInsets.only(left: 0, right: 0),
-        ),
-      );
+      mapController.fitCamera(CameraFit.bounds(
+        bounds: _curBounds,
+        minZoom: 9,
+        maxZoom: 24,
+        padding: EdgeInsets.only(left: 0, right: 0),
+      ));
     }
-
-    /*stackItems.add(Positioned(
-      width: 200,
-      height: 300,
-      top: 10,
-      left: 10,
-      child: Container(
-        color: Colors.black45,
-      ),
-    ));*/
   }
 
   @override
@@ -556,7 +541,6 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
       children: [
         if (_locationId != '' || _itemTitle != '')
           Container(
-            //height: 40,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -578,28 +562,12 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        /*FloatingActionButton(
-                          key: Key('FABlocation'),
-                          heroTag: null,
-                          backgroundColor: Colors.blue,
-                          child: Text('1'),
-                          mini: true,
-                          onPressed: () => {},
-                        ),*/
                       ],
                     ),
                   ),
                 if (_itemTitle != '')
                   Padding(
                     padding: const EdgeInsets.all(12.0),
-                    /*
-                    child: Text(
-                      'osti+' + _itemTitle,
-                      maxLines: 2,
-                      softWrap: true,
-                      overflow: TextOverflow.ellipsis,
-                    ),*/
-
                     child: Row(
                       children: [
                         SizedBox(width: 10),
@@ -632,9 +600,10 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
                 FlutterMap(
                   mapController: mapController,
                   options: MapOptions(
-                    bounds: _curBounds,
-                    boundsOptions: FitBoundsOptions(
+                    initialCameraFit: CameraFit.bounds(
+                      bounds: _curBounds,
                       maxZoom: 24,
+                      minZoom: 9,
                       padding: EdgeInsets.only(left: 0.0, right: 0.0),
                     ),
                     onTap: (tapPos, latLng) {
@@ -652,23 +621,22 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
                           'OnTap: LatLng: ${latLng.latitude}, ${latLng.longitude}');
 
                       setState(() {
-                        // TODO  forse da rimuovere
-                        mapController.fitBounds(_curBounds,
-                            options: FitBoundsOptions(
-                              maxZoom: 24,
-                              padding: EdgeInsets.only(left: 0, right: 0),
-                            ));
+                        mapController.fitCamera(
+                          CameraFit.bounds(
+                            bounds: _curBounds,
+                            maxZoom: 24,
+                            minZoom: 9,
+                            padding: EdgeInsets.only(left: 0, right: 0),
+                          ),
+                        );
                       });
                     },
-                    zoom: 20.0,
+                    initialZoom: 20.0,
                     maxZoom: 24.0,
                     minZoom: 9.0,
-                    /*allowPanningOnScrollingParent: false,
-                    plugins: [
-                      DragMarkerPlugin(),  TODO
-                    ],*/
-                    interactiveFlags:
-                        InteractiveFlag.pinchZoom | InteractiveFlag.drag,
+                    interactionOptions: InteractionOptions(
+                      flags: InteractiveFlag.pinchZoom | InteractiveFlag.drag,
+                    ),
                   ),
                   children: [
                     if (widget.openstreetmap)
@@ -681,8 +649,8 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
                       ),
                     OverlayImageLayer(overlayImages: overlayImages),
                     CircleLayer(circles: _getCircles()),
-                    //DragMarkerPlugin(markers: _getDraggableMarkers()), TODO
-                    //MarkerLayerOptions(markers: _getMarkers()),
+                    DragMarkers(markers: _getDraggableMarkers()),
+                    MarkerLayer(markers: _getMarkers()),
                   ],
                 ),
                 if (widget.toolbarPosition == ToolbarPosition.right)
