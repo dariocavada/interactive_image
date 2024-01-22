@@ -11,9 +11,12 @@ dependencies:
   flutter:
     sdk: flutter
 
+  # Solo Android, iOS, mac
   flutter_cache_manager: ^3.3.1
   cached_network_image: ^3.3.1
   path_provider: ^2.1.2
+
+  # Compatibili anche con Web
   flutter_map: ^6.1.0
   flutter_map_dragmarker: ^6.0.0
   latlong2: ^0.9.0

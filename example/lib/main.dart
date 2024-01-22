@@ -13,25 +13,23 @@ import 'package:path_provider/path_provider.dart';
 InteractiveImageController interactiveImageController =
     InteractiveImageController();
 
-void main() {
-  /*debugPaintSizeEnabled = true;
-  debugPaintBaselinesEnabled = false;
-  debugPaintLayerBordersEnabled = false;
-  debugPaintPointersEnabled = true;
-  debugRepaintRainbowEnabled = false;
-  debugRepaintTextRainbowEnabled = false;
-  debugCheckElevationsEnabled = false;
-  debugDisableClipLayers = false;
-  debugDisablePhysicalShapeLayers = true;
-  debugDisableOpacityLayers = true;*/
-  runApp(MyApp());
-}
+/*
+          /* url:
+              'https://raw.githubusercontent.com/dariocavada/interactive_image/master/data/configuration.json',*/
+          /*url:
+              'https://s3-eu-west-1.amazonaws.com/mkspresprod.suggesto.eu/mdgcaritro/mappe/demo/configuration.json',*/
+          /*url:
+              'https://s3-eu-west-1.amazonaws.com/mkspresprod.suggesto.eu/mdgcaritro/mappe/mcf/configuration.json',*/
 
-/* Future<File> writeStringToFile(String value) async {
-  final directory = await getApplicationDocumentsDirectory();
-  final file = File('${directory.path}/configuration.json');
-  return file.writeAsString(value);
-}*/
+*/
+
+String _itemid = '';
+String globalurl =
+    'https://s3-eu-west-1.amazonaws.com/mkspresprod.suggesto.eu/mdgcaritro/mappe/mdg/configuration.json';
+
+void main() {
+  runApp(const MyApp());
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -44,7 +42,6 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: HomeScreen(),
-      //home: AnimatedMapControllerPage(),
     );
   }
 }
@@ -61,7 +58,6 @@ class ConfigStorage {
     String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
 
     if (selectedDirectory == null) {
-      print('$path/interactiveimageconfig.json');
       return File('$path/interactiveimageconfig.json');
     } else {
       return File('$selectedDirectory/interactiveimageconfig.json');
@@ -71,9 +67,7 @@ class ConfigStorage {
   Future<String> readConfig() async {
     try {
       final file = await _localFile;
-
       final content = await file.readAsString();
-
       return content;
     } catch (e) {
       // If encountering an error, return 0
@@ -83,8 +77,6 @@ class ConfigStorage {
 
   Future<File> writeConfig(String config) async {
     final file = await _localFile;
-
-    // Write the file
     return file.writeAsString(config);
   }
 }
@@ -99,25 +91,11 @@ class HomeScreen extends StatefulWidget {
 }
 
 class HomeScreenState extends State<HomeScreen> {
-  String _itemid = '';
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      /*bottomSheet: Container(
-        color: Colors.yellow,
-        alignment: Alignment.center,
-        height: 100,
-        width: double.infinity,
-        padding: const EdgeInsets.all(20.0),
-        child: Text(
-          'USe Image size for markers ! https://stackoverflow.com/questions/49307677/how-to-get-height-of-a-widget',
-          maxLines: 10,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ),*/
       appBar: AppBar(
-        title: const Text('Interactive Image: Edit mode'),
+        title: const Text('Interactive Image Edit'),
         actions: <Widget>[
           IconButton(
             icon: const Icon(Icons.arrow_forward),
@@ -148,17 +126,8 @@ class HomeScreenState extends State<HomeScreen> {
           // If we have a translation of the item, otherwise take the item title value
           itemtitle: 'Name of the poi',
           // Shown only if the controller is attached and the positionid is set
-          mypositionlabel: 'La tua posizione',
-          /* url:
-              'https://raw.githubusercontent.com/dariocavada/interactive_image/master/data/configuration.json',*/
-          /*url:
-              'https://s3-eu-west-1.amazonaws.com/mkspresprod.suggesto.eu/mdgcaritro/mappe/demo/configuration.json',*/
-          /*url:
-              'https://s3-eu-west-1.amazonaws.com/mkspresprod.suggesto.eu/mdgcaritro/mappe/mcf/configuration.json',*/
-          url:
-              'https://s3-eu-west-1.amazonaws.com/mkspresprod.suggesto.eu/mdgcaritro/mappe/mdg/configuration.json',
-          /*url:
-              'https://s3-eu-west-1.amazonaws.com/mkspresprod.suggesto.eu/mdgcaritro/mappe/istladin/configuration.json',*/
+          mypositionlabel: 'Posizione',
+          url: globalurl,
           onGenerateConfig: (value) async {
             widget.storage.writeConfig(value);
           },
@@ -168,6 +137,9 @@ class HomeScreenState extends State<HomeScreen> {
           },
           onItemClick: (value) async {
             print('onItemClick: $value');
+
+            /* Global item id */
+            _itemid = value.id;
 
             interactiveImageController.msitem.id = value.id; //
             interactiveImageController.msitem.number = value.number; //
@@ -200,24 +172,24 @@ class TestScreen extends StatefulWidget {
   final String itemid;
 
   @override
-  _TestScreenState createState() => _TestScreenState();
+  TestScreenState createState() => TestScreenState();
 }
 
-class _TestScreenState extends State<TestScreen> {
+class TestScreenState extends State<TestScreen> {
   final InteractiveImageController interactiveImageController =
-      new InteractiveImageController();
+      InteractiveImageController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Interactive Image: Test'),
+        title: const Text('Test'),
         actions: [
           Theme(
             data: Theme.of(context).copyWith(
               dividerColor: Colors.white,
-              iconTheme: IconThemeData(color: Colors.white),
-              textTheme: TextTheme().apply(bodyColor: Colors.white),
+              iconTheme: const IconThemeData(color: Colors.white),
+              textTheme: const TextTheme().apply(bodyColor: Colors.white),
             ),
             child: PopupMenuButton<int>(
                 color: Colors.orange,
@@ -248,15 +220,7 @@ class _TestScreenState extends State<TestScreen> {
         interactive: false,
         iicontroller: interactiveImageController,
         itemid: widget.itemid,
-
-        /* url:
-              'https://raw.githubusercontent.com/dariocavada/interactive_image/master/data/configuration.json',*/
-        /*url:
-            'https://s3-eu-west-1.amazonaws.com/mkspresprod.suggesto.eu/mdgcaritro/mappe/mcf/configuration.json',*/
-        /*url:
-            'https://s3-eu-west-1.amazonaws.com/mkspresprod.suggesto.eu/mdgcaritro/mappe/mdg/configuration.json',*/
-        url:
-            'https://s3-eu-west-1.amazonaws.com/mkspresprod.suggesto.eu/mdgcaritro/mappe/istladin/configuration.json',
+        url: globalurl,
       ),
     );
   }
@@ -265,14 +229,16 @@ class _TestScreenState extends State<TestScreen> {
 class FormScreen extends StatelessWidget {
   final _formKey = GlobalKey<FormBuilderState>();
 
+  FormScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Interactive Image: Edit mode'),
+        title: const Text('Edit'),
         actions: <Widget>[
           IconButton(
-            icon: Icon(Icons.save),
+            icon: const Icon(Icons.save),
             tooltip: 'Save',
             onPressed: () {
               Navigator.pop(context);
@@ -294,7 +260,7 @@ class FormScreen extends StatelessWidget {
                   FormBuilderTextField(
                     name: 'id',
                     initialValue: interactiveImageController.msitem.id,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'id',
                     ),
                     onChanged: (value) => {
@@ -304,7 +270,7 @@ class FormScreen extends StatelessWidget {
                   FormBuilderTextField(
                     name: 'number',
                     initialValue: interactiveImageController.msitem.number,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'number',
                     ),
                     onChanged: (value) => {
@@ -314,7 +280,7 @@ class FormScreen extends StatelessWidget {
                   FormBuilderTextField(
                     name: 'title',
                     initialValue: interactiveImageController.msitem.title,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'title',
                     ),
                     onChanged: (value) => {
@@ -324,7 +290,7 @@ class FormScreen extends StatelessWidget {
                   FormBuilderTextField(
                     name: 'subtitle',
                     initialValue: interactiveImageController.msitem.subtitle,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'subtitle',
                     ),
                     onChanged: (value) => {
@@ -334,7 +300,7 @@ class FormScreen extends StatelessWidget {
                   FormBuilderTextField(
                     name: 'description',
                     initialValue: interactiveImageController.msitem.description,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'description',
                     ),
                     onChanged: (value) => {

@@ -1,4 +1,7 @@
 
+## 6.0.2
+* Porting also dragmarker and update the editing part
+
 ## 6.0.0
 * Porting to flutter_map v 6.0
 
