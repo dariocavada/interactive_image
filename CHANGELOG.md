@@ -1,6 +1,7 @@
 
-## 6.0.2
+## 6.0.1
 * Porting also dragmarker and update the editing part
+* Add macos support for editing maps
 
 ## 6.0.0
 * Porting to flutter_map v 6.0
