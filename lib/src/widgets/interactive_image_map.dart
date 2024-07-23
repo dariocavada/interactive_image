@@ -3,10 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:interactive_image/src/models/iconfig.dart';
 import 'package:interactive_image/src/shared/icache_manager.dart';
-//import 'package:interactive_image/src/shared/icached_image.dart';
-//import 'movable_stack_item.dart';
 import '../controllers/interactive_image_controller.dart';
-//import 'measured_size.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_dragmarker/flutter_map_dragmarker.dart';
 import 'package:latlong2/latlong.dart';
@@ -73,6 +70,8 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
   String _mapTitle = '';
   IConfig? iConfig;
 
+  String _errorText = '';
+
   @override
   void initState() {
     super.initState();
@@ -126,8 +125,6 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
             });
           });
         }
-
-        //_getPosAndDestinationMarkers();
       });
     }
   }
@@ -148,45 +145,42 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
   }
 
   void _asyncInitializer() async {
-    // TODO MANAGE offline
-    //if (widget.clearcache) {
-    await CustomCacheManager.instance.emptyCache();
-    //}
+    if (widget.clearcache) {
+      await CustomCacheManager.instance.emptyCache();
+    }
 
     FileInfo? fi2 =
         await CustomCacheManager.instance.getFileFromCache(widget.url);
-    if (fi2 == null) {
+
+    if (fi2 != null) {
+      // File exists in cache, use it
+      var file = fi2.file;
+      iConfig = iConfigFromJson(file.readAsStringSync());
+      String itemFloor = _addItemIds(widget.itemid);
+      _resetErrorElement();
+      _changeFloor(itemFloor);
+    } else {
       try {
         await CustomCacheManager.instance.downloadFile(widget.url);
         var file = await CustomCacheManager.instance.getSingleFile(widget.url);
         iConfig = iConfigFromJson(file.readAsStringSync());
         String itemFloor = _addItemIds(widget.itemid);
-
+        _resetErrorElement();
         _changeFloor(itemFloor);
       } catch (e) {
-        _addErrorElement('No internet connection ${e.toString()}');
+        _setErrorElement('No internet connection ${e.toString()}');
       }
     }
   }
 
-  void _addErrorElement(String text) {
-    /*stackItems.clear();
+  void _setErrorElement(String text) {
     setState(() {
-      stackItems.add(
-        Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            children: [
-              Text(text),
-              SizedBox(
-                height: 10.0,
-              ),
-              Icon(Icons.error),
-            ],
-          ),
-        ),
-      );
-    });*/
+      _errorText = text;
+    });
+  }
+
+  void _resetErrorElement() {
+    _errorText = '';
   }
 
   String _addItemIds(String itemId) {
@@ -498,7 +492,6 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
 
   void _addImageItem() {
     if (iConfig != null) {
-      print('****** _addImageItem');
       //_getCurLatLngBounds
       double la =
           iConfig!.floors[_getFloorIndexFromId(_selFloor)].latLngBounds[0][0];
@@ -653,6 +646,10 @@ class _InteractiveImageMapState extends State<InteractiveImageMap>
                     MarkerLayer(markers: _getMarkers()),
                   ],
                 ),
+                if (_errorText.isNotEmpty)
+                  Center(
+                    child: Text(_errorText),
+                  ),
                 if (widget.toolbarPosition == ToolbarPosition.right)
                   Positioned(
                     right: 10,
