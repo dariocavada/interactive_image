@@ -1,4 +1,8 @@
 
+## 8.0.0
+* Porting to flutter_map v 8.x
+* Updated dependencies to the latest version
+
 ## 7.0.0
 * Porting to flutter_map v 7.0
 * Updated dependencies to the latest version
